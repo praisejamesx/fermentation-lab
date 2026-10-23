@@ -2,7 +2,7 @@
   "schema": "osmograph.domain-pack/1",
   "id": "praisejamesx.fermentation",
   "name": "Fermentation Lab",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": "@praisejamesx",
   "license": "CC-BY-4.0",
   "risk": "high",

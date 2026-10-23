@@ -7,6 +7,7 @@
   display: grid;
   grid-template-columns: 218px minmax(0, 1fr);
   gap: 14px;
+  height: 100vh;
   min-height: 420px;
   padding: 12px 14px 14px;
   background: var(--paper, #f7f2e8);
@@ -31,7 +32,7 @@
 .fhome-activity b { font-family: var(--mono); font-size: 20px; line-height: 1; letter-spacing: -.03em; }
 .fhome-activity span { font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
 .fhome-note { color: var(--muted); font-size: 9px; line-height: 1.45; }
-.fhome-main { display: grid; grid-template-rows: auto auto 150px auto; gap: 9px; min-width: 0; }
+.fhome-main { display: grid; grid-template-rows: auto auto minmax(180px, 1fr) auto; gap: 9px; min-width: 0; }
 .fhome-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .fhome-head h1 { margin: 2px 0 2px; font-size: 24px; line-height: 1.02; letter-spacing: -.03em; font-weight: 650; }
 .fhome-head .sub { color: var(--muted); font-size: 10px; }
@@ -59,8 +60,7 @@
 .fhome-pill.info { color: var(--cyan); border-color: #a8d4de; background: var(--cyan-soft); }
 .fhome-trajectory {
   position: relative;
-  height: 150px;
-  min-height: 0;
+  min-height: 180px;
   border: 1px solid var(--line);
   background: linear-gradient(180deg, var(--panel), var(--panel-2));
   overflow: hidden;
@@ -73,8 +73,21 @@
   padding: 6px 8px 0;
 }
 .fhome-trajectory-head .stamp { font-family: var(--mono); font-size: 7px; color: var(--muted-2); }
-#liveChart { display: block; width: 100%; height: auto; min-height: 0; flex: 1 1 auto; }
+#liveChart { display: block; width: 100%; min-height: 90px; flex: 1 1 0; }
+.fhome-track-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  flex: 0 0 auto; padding: 3px 8px 0; border-top: 1px solid var(--line);
+}
+#batchChart { display: block; width: 100%; height: 34px; flex: 0 0 34px; }
 .fhome-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 1.05fr); gap: 9px; align-items: start; }
+.fhome-stack { display: grid; gap: 9px; min-width: 0; }
+.fhome-watch { padding: 7px 9px; border: 1px solid var(--line); background: var(--panel); min-width: 0; }
+.fhome-watch-limits { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0; }
+.fhome-watch-limits label { display: grid; gap: 2px; min-width: 62px; }
+.fhome-watch-limits .k { font-family: var(--mono); font-size: 7px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted-2); white-space: nowrap; }
+.fhome-watch-limits input { width: 100%; font-size: 9px; padding: 3px 4px; }
+.fhome-watch-actions { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.fhome-watch-actions .stamp { flex: 1 1 140px; font-family: var(--mono); font-size: 7px; color: var(--muted-2); line-height: 1.35; }
 .fhome-status { padding: 7px 9px; border: 1px solid var(--line); border-left: 3px solid var(--line-strong); background: var(--panel); min-width: 0; }
 .fhome-status.good { border-left-color: var(--green); }
 .fhome-status.warn { border-left-color: var(--amber); }
@@ -92,11 +105,11 @@
 .fhome-source select { max-width: 150px; font-size: 8px; }
 .fhome-empty { padding: 10px; border: 1px dashed var(--line-strong); color: var(--muted); font-size: 9px; }
 @media (max-width: 760px) {
-  .fhome { grid-template-columns: 1fr; min-height: 0; }
+  .fhome { grid-template-columns: 1fr; height: auto; min-height: 0; }
   .fhome-tank { min-height: 0; }
   .fhome-tank svg { height: 190px; }
-  .fhome-main { grid-template-rows: auto auto 130px auto; }
-  .fhome-trajectory { height: 130px; }
+  .fhome-main { grid-template-rows: auto auto 150px auto; }
+  .fhome-trajectory { height: 150px; }
   .fhome-bottom { grid-template-columns: 1fr; }
   .fhome-quick { grid-template-columns: 1fr 1fr 1fr; }
   .fhome-quick button { grid-column: 1 / -1; }
@@ -170,15 +183,35 @@
         <span class="fhome-source"><select id="sourceSelect" aria-label="Sensor data source"></select><span class="stamp" id="seriesStamp">no live window</span></span>
       </div>
       <svg id="liveChart" viewBox="0 0 520 130" preserveAspectRatio="none" role="img" aria-label="Live normalized array response"></svg>
+      <div class="fhome-track-head">
+        <span class="eyebrow">TRACKED TRAJECTORY · HOST-PERSISTED</span>
+        <span class="stamp" id="trackStamp">not tracking</span>
+      </div>
+      <svg id="batchChart" viewBox="0 0 520 34" preserveAspectRatio="none" role="img" aria-label="Persisted trajectory of host-tracked fields"></svg>
     </section>
 
     <div class="fhome-bottom">
-      <section class="fhome-status info" id="statusCard">
-        <div class="eyebrow">PRIMARY CONTROLS</div>
-        <div class="label" id="statusLabel">Not started</div>
-        <div class="copy" id="statusCopy">Add a reading to start the batch clock. The workspace holds the full log and stop rules.</div>
-        <div class="stamp">Quick status only · the log and recipe decide. pH, temperature, ferment type, target, and structured visible faults are the inputs. A pleasant smell cannot clear a batch.</div>
-      </section>
+      <div class="fhome-stack">
+        <section class="fhome-status info" id="statusCard">
+          <div class="eyebrow">PRIMARY CONTROLS</div>
+          <div class="label" id="statusLabel">Not started</div>
+          <div class="copy" id="statusCopy">Add a reading to start the batch clock. The workspace holds the full log and stop rules.</div>
+          <div class="stamp">Quick status only · the log and recipe decide. pH, temperature, ferment type, target, and structured visible faults are the inputs. A pleasant smell cannot clear a batch.</div>
+        </section>
+
+        <section class="fhome-watch" id="watchCard">
+          <div class="fhome-trajectory-head" style="padding-left:0;padding-right:0">
+            <span class="eyebrow">DOMAIN WATCH · THIS RIG</span>
+            <span class="fhome-pill" id="watchPill">NOT CONFIGURED</span>
+          </div>
+          <div class="fhome-watch-limits" id="watchLimits"><span class="stamp">No live channel limits yet. Connect the array and let the baseline settle.</span></div>
+          <div class="fhome-watch-actions">
+            <button type="button" id="watchApply">Apply to host</button>
+            <button type="button" id="watchDisable">Disable</button>
+            <span class="stamp" id="watchNote">Default limit is 4× the measured coefficient of variation — a single-unit noise floor, not a taste threshold.</span>
+          </div>
+        </section>
+      </div>
 
       <form class="fhome-quick" id="quickLog">
         <label><span class="k">Day</span><input name="day" type="number" step="1" min="0" placeholder="—" /></label>
@@ -342,8 +375,7 @@
     }
     return "hsl(" + hue.toFixed(0) + " " + sat.toFixed(0) + "% " + light.toFixed(0) + "%)";
   }
-  function normalizedSeries(series) {
-    if (!series || !series.values || !series.values.length) return [];
+  function normalizedSeries(series) {    if (!series || !series.values || !series.values.length) return [];
     var length = 0;
     series.values.forEach(function (channel) { length = Math.max(length, channel.length); });
     var z = [];
@@ -366,15 +398,33 @@
     });
     return out.slice(-180);
   }
+  function responseSeries(series) {
+    if (!series || !series.values) return [];
+    if (!series.response || !series.response.values) return normalizedSeries(series);
+    var values = series.response.values;
+    var length = 0;
+    values.forEach(function (channel) { length = Math.max(length, channel.length); });
+    var out = [];
+    for (var i = 0; i < length; i++) {
+      var sum = 0, n = 0;
+      values.forEach(function (channel) {
+        var v = channel[i];
+        if (v !== null && v !== undefined && Number.isFinite(v)) { sum += v; n++; }
+      });
+      if (n) out.push(sum / n);
+    }
+    return out.slice(-180);
+  }
   function activityOf(series) {
-    var line = normalizedSeries(series);
+    var line = responseSeries(series);
     if (line.length < 4) return 0;
     var sum = 0, count = 0;
     for (var i = 1; i < line.length; i++) {
       sum += Math.abs(line[i] - line[i - 1]);
       count++;
     }
-    return Math.max(0, Math.min(1, (count ? sum / count : 0) * 2.4));
+    var scale = series && series.response ? 500 : 2.4;
+    return Math.max(0, Math.min(1, (count ? sum / count : 0) * scale));
   }
   function drawChart(series) {
     var svg = $("#liveChart");
@@ -384,7 +434,7 @@
     var H = Math.max(100, Math.round(rect.height || 130));
     var L = 8, R = 8, T = 8, B = 16;
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
-    var line = normalizedSeries(series);
+    var line = responseSeries(series);
     if (!line.length) {
       svg.appendChild(svgEl("text", { x: W / 2, y: H / 2, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 10 }, "No live window. The batch log still works without a sensor."));
       return;
@@ -407,7 +457,7 @@
     svg.appendChild(svgEl("path", { d: path, fill: "none", stroke: "#0e7490", "stroke-width": 1.8, "stroke-linejoin": "round", "stroke-linecap": "round" }));
     var lastX = x(line.length - 1), lastY = y(line[line.length - 1]);
     svg.appendChild(svgEl("circle", { cx: lastX.toFixed(1), cy: lastY.toFixed(1), r: 3.2, fill: "#0e7490", stroke: "#fffdf8", "stroke-width": 1 }));
-    svg.appendChild(svgEl("text", { x: L, y: H - 3, fill: "#8a7f6c", "font-size": 8, "font-family": "monospace" }, "z-scored mean · last " + line.length + " points"));
+    svg.appendChild(svgEl("text", { x: L, y: H - 3, fill: "#8a7f6c", "font-size": 8, "font-family": "monospace" }, (series && series.response ? "ΔR/R₀ (" + series.response.baseline + ") · mean of " + series.channels.length + " ch" : "z-scored mean · host has no declared transforms") + " · last " + line.length + " points"));
   }
   function svgEl(name, attrs, text) {
     var el = document.createElementNS(SVG, name);
@@ -430,6 +480,182 @@
       });
     }
     if (data && data.selectedSource) select.value = data.selectedSource;
+  }
+  var transformsRequested = false;
+  var trajectoryRequested = false;
+  var watchSig = "";
+  function liveChannels() {
+    var snap = data && data.snapshot;
+    if (!snap || snap.source !== "live" || !snap.channelLimits) return [];
+    return (snap.channels || []).filter(function (c) {
+      var limit = snap.channelLimits[c.id];
+      return limit && !limit.dead;
+    });
+  }
+  function recommendedLimit(channelId) {
+    var snap = data && data.snapshot;
+    var limit = snap && snap.channelLimits ? snap.channelLimits[channelId] : null;
+    var cv = limit && Number.isFinite(limit.cv) ? limit.cv : 0;
+    return Math.max(0.02, Math.round(cv * 4 * 1000) / 1000);
+  }
+  function setPill(id, text, tone) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className = "fhome-pill" + (tone ? " " + tone : "");
+  }
+  function maybeDeclare() {
+    var snap = data && data.snapshot;
+    if (!snap || snap.source !== "live") return;
+    if (!transformsRequested && !(snap.transformsApplied || []).length && typeof bridge.setTransforms === "function") {
+      transformsRequested = true;
+      bridge.setTransforms({ baseline: "first-n", response: "delta-over-r0" });
+    }
+    var live = liveChannels();
+    if (!trajectoryRequested && live.length && !(snap.trajectory || []).length && typeof bridge.setTrajectory === "function") {
+      trajectoryRequested = true;
+      var fields = live.slice(0, 2).map(function (c) { return c.id; });
+      fields.push("anomaly.score");
+      bridge.setTrajectory({ fields: fields, intervalMs: 60000 });
+    }
+  }
+  function renderWatch() {
+    var snap = data && data.snapshot;
+    var box = $("#watchLimits");
+    var live = liveChannels();
+    if (!snap || snap.source !== "live" || !live.length) {
+      box.innerHTML = '<span class="stamp">No live channel limits yet. Connect the array and let the baseline settle.</span>';
+      setPill("watchPill", "NOT CONFIGURED", "");
+      return;
+    }
+    var sig = live.map(function (c) { return c.id; }).join(",");
+    if (sig !== watchSig) {
+      watchSig = sig;
+      box.textContent = "";
+      live.slice(0, 6).forEach(function (c) {
+        var label = document.createElement("label");
+        var k = document.createElement("span");
+        k.className = "k";
+        k.textContent = String(c.label || c.id).slice(0, 12);
+        var input = document.createElement("input");
+        input.type = "number";
+        input.step = "0.005";
+        input.min = "0";
+        input.dataset.channel = c.id;
+        input.value = String(recommendedLimit(c.id));
+        var limit = snap.channelLimits[c.id] || {};
+        input.title = c.id + " · 4× measured CV (cv=" + Number(limit.cv || 0).toFixed(4) + (limit.r0 !== null && limit.r0 !== undefined ? ", r0=" + Number(limit.r0).toFixed(0) : "") + ")";
+        label.appendChild(k);
+        label.appendChild(input);
+        box.appendChild(label);
+      });
+    }
+    var config = snap.detectionConfig;
+    if (config && config.enabled) {
+      var detection = snap.detection;
+      if (detection && detection.active) {
+        setPill("watchPill", "WATCH TRIGGERED", "stop");
+        setText("watchNote", "Triggered: " + (detection.triggeredChannels || []).join(", ") + " · confidence " + (snap.anomaly.confidence !== null ? (snap.anomaly.confidence * 100).toFixed(0) + "%" : "—") + ". The log and primary controls still decide.");
+      } else {
+        setPill("watchPill", "WATCH ON", "good");
+        setText("watchNote", "Armed on " + Object.keys(config.perChannelLimits || {}).length + " channel(s) · confidence floor " + Math.round((config.alertThreshold || 0) * 100) + "%. This is an array deviation, not a safety result.");
+      }
+    } else if (config && !config.enabled) {
+      setPill("watchPill", "WATCH OFF", "");
+      setText("watchNote", "Domain watch disabled. The host detector still runs; this only removes the Vial-declared limit.");
+    } else {
+      setPill("watchPill", "NOT CONFIGURED", "");
+      setText("watchNote", "Default limit is 4× the measured coefficient of variation — a single-unit noise floor, not a taste threshold.");
+    }
+  }
+  function applyWatch() {
+    var snap = data && data.snapshot;
+    if (!snap || snap.source !== "live") {
+      bridge.toast("Domain watch needs a live array.");
+      return;
+    }
+    var limits = {};
+    document.querySelectorAll("#watchLimits input[data-channel]").forEach(function (input) {
+      var value = Number(input.value);
+      if (Number.isFinite(value) && value > 0) limits[input.dataset.channel] = value;
+    });
+    if (!Object.keys(limits).length) {
+      bridge.toast("Enter at least one positive limit.");
+      return;
+    }
+    bridge.setDetection({ enabled: true, alertThreshold: 0.5, perChannelLimits: limits });
+  }
+  function disableWatch() {
+    var snap = data && data.snapshot;
+    var existing = snap && snap.detectionConfig ? snap.detectionConfig.perChannelLimits : null;
+    if (existing && Object.keys(existing).length) {
+      bridge.setDetection({ enabled: false, alertThreshold: 0.5, perChannelLimits: existing });
+      return;
+    }
+    var limits = {};
+    document.querySelectorAll("#watchLimits input[data-channel]").forEach(function (input) {
+      var value = Number(input.value);
+      if (Number.isFinite(value) && value > 0) limits[input.dataset.channel] = value;
+    });
+    if (!Object.keys(limits).length) {
+      bridge.toast("Nothing to disable — no live limit is armed.");
+      return;
+    }
+    bridge.setDetection({ enabled: false, alertThreshold: 0.5, perChannelLimits: limits });
+  }
+  function drawBatch() {
+    var svg = $("#batchChart");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var rect = svg.getBoundingClientRect();
+    var W = Math.max(320, Math.round(rect.width || 520));
+    var H = Math.max(30, Math.round(rect.height || 34));
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var points = (data && data.snapshot && data.snapshot.trajectory) || [];
+    if (!points.length) {
+      setText("trackStamp", "no points yet · host samples every 60 s once armed");
+      svg.appendChild(svgEl("text", { x: 8, y: H - 10, fill: "#8a7f6c", "font-size": 8, "font-family": "monospace" }, "Host-tracked trajectory starts when the baseline is ready."));
+      return;
+    }
+    var last = points[points.length - 1].values || {};
+    var key = Object.prototype.hasOwnProperty.call(last, "anomaly.score") ? "anomaly.score" : Object.keys(last)[0];
+    if (!key) {
+      setText("trackStamp", points.length + " points · no numeric field");
+      return;
+    }
+    var values = points.map(function (point) {
+      var v = point.values ? point.values[key] : null;
+      return Number.isFinite(v) ? v : null;
+    });
+    var finite = values.filter(function (v) { return v !== null; });
+    if (!finite.length) {
+      setText("trackStamp", points.length + " points · " + key + " empty");
+      return;
+    }
+    var min = Math.min.apply(null, finite);
+    var max = Math.max.apply(null, finite);
+    var span = Math.max(1e-9, max - min);
+    var L = 8, R = 8, T = 4, B = 10;
+    var x = function (i) { return L + (i / Math.max(1, values.length - 1)) * (W - L - R); };
+    var y = function (v) { return T + (1 - (v - min) / span) * (H - T - B); };
+    var path = "";
+    var started = false;
+    values.forEach(function (v, i) {
+      if (v === null) { started = false; return; }
+      path += (started ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1);
+      started = true;
+    });
+    svg.appendChild(svgEl("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: "#e6dccd", "stroke-width": 1 }));
+    svg.appendChild(svgEl("path", { d: path, fill: "none", stroke: "#0e7490", "stroke-width": 1.4, "stroke-linejoin": "round" }));
+    var lastIndex = values.length - 1;
+    while (lastIndex >= 0 && values[lastIndex] === null) lastIndex--;
+    if (lastIndex >= 0) {
+      svg.appendChild(svgEl("circle", { cx: x(lastIndex).toFixed(1), cy: y(values[lastIndex]).toFixed(1), r: 2.4, fill: "#0e7490", stroke: "#fffdf8", "stroke-width": 1 }));
+    }
+    var firstAt = points[0].at;
+    var lastAt = points[points.length - 1].at;
+    var minutes = Math.max(0, (lastAt - firstAt) / 60000);
+    var duration = minutes >= 120 ? (minutes / 60).toFixed(1) + " h" : minutes >= 1 ? minutes.toFixed(0) + " min" : "<1 min";
+    setText("trackStamp", points.length + (points.length === 1 ? " pt · " : " pts · ") + key + " · " + duration + " · last " + (last[key] !== undefined ? Number(last[key]).toFixed(3) : "—"));
   }
   function render() {
     if (!data) return;
@@ -473,6 +699,9 @@
       : "No live array. The batch log and quick status still work; bubbles idle until a source is available.");
     renderSources();
     drawChart(data.series);
+    maybeDeclare();
+    renderWatch();
+    drawBatch();
     var dayInput = $("#quickLog [name=day]");
     if (dayInput && document.activeElement !== dayInput && !dayInput.value) {
       var started = dateDay(fields.started);
@@ -515,6 +744,8 @@
     if (dayInput) dayInput.value = String(dateDay(fields.started) !== null ? currentDay(logs) : maxDay(logs) + 1);
   }
   $("#quickLogSubmit").addEventListener("click", submitQuickLog);
+  $("#watchApply").addEventListener("click", applyWatch);
+  $("#watchDisable").addEventListener("click", disableWatch);
   $("#quickLog").addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -523,7 +754,7 @@
   });
   if (window.ResizeObserver) {
     new ResizeObserver(function () {
-      if (data) drawChart(data.series);
+      if (data) { drawChart(data.series); drawBatch(); }
     }).observe($("#liveChart"));
   }
   bridge.ready();
