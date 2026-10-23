@@ -1,0 +1,8 @@
+{
+  "name": "osmograph-vial-fermentation-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/test.mjs"
+  }
+}

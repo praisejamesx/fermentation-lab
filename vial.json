@@ -1,0 +1,433 @@
+{
+  "schema": "osmograph.domain-pack/1",
+  "id": "praisejamesx.fermentation",
+  "name": "Fermentation Lab",
+  "version": "0.4.0",
+  "author": "@praisejamesx",
+  "license": "CC-BY-4.0",
+  "risk": "high",
+  "domain": "fermentation",
+  "tagline": "Track the batch, not just the bubble.",
+  "summary": "A workspace for tracking a ferment with pH, temperature, visual cues, and your own array baseline — with food safety kept out of the smell channel.",
+  "whatItIs": "A protocol, log, and decision-support workspace for home fermentation. It helps you record what changed, compare a batch to a reference blank on the same array, and stop when the primary controls say stop.",
+  "whatItIsNot": "Not a pathogen test, not a pH meter, not a universal fermentation classifier, and not a cross-rig claim. A pleasant smell cannot clear a batch.",
+  "ui": {
+    "runtime": "sandbox/1",
+    "entry": "ui.html",
+    "height": 1040
+  },
+  "homeUi": {
+    "runtime": "sandbox/1",
+    "entry": "home.html",
+    "height": 420
+  },
+  "home": {
+    "headline": "The batch is the record, not the bubble.",
+    "detail": "pH, temperature, recipe, and visible faults decide. The array only shows that something moved on this rig.",
+    "metrics": [
+      { "label": "Batch", "value": "logged" },
+      { "label": "Primary controls", "value": "pH · temp" },
+      { "label": "Array", "value": "same-rig change" },
+      { "label": "Journal", "value": "local-only" }
+    ],
+    "actions": [
+      { "id": "workspace", "label": "Open workspace", "kind": "open-workspace" },
+      { "id": "check", "label": "Check", "kind": "open-check" },
+      { "id": "datasets", "label": "Datasets", "kind": "open-datasets" }
+    ],
+    "limits": [
+      "A pleasant smell cannot clear a batch. pH, time, temperature, recipe, and visible evidence decide."
+    ],
+    "sources": [
+      "FDA Bad Bug Book (2012); USDA Complete Guide to Home Canning (2015); 21 CFR 114."
+    ]
+  },
+  "citations": [
+    "FDA. Bad Bug Book: Foodborne Pathogenic Microorganisms and Natural Toxins, 2nd ed. (2012).",
+    "USDA. Complete Guide to Home Canning (2015).",
+    "Codex Alimentarius. General Principles of Food Hygiene (CXC 1-1969, rev.).",
+    "21 CFR 114 / FDA acidified foods guidance uses pH 4.6 as the botulism-control boundary for low-acid foods."
+  ],
+  "widgets": [
+    {
+      "type": "hero",
+      "art": "fermentation",
+      "title": "Fermentation Lab",
+      "subtitle": "A batch log that keeps the sensor honest.",
+      "note": "Example Vial · sandboxed cockpit · host-owned data"
+    },
+    {
+      "type": "risk",
+      "level": "high",
+      "headline": "Food safety is not a smell test.",
+      "body": "A Vial can tell you a sample changed on your array. It cannot tell you a batch is safe. pH, time, temperature, recipe, and visible evidence decide.",
+      "always": [
+        "Use a calibrated pH meter and a tested recipe.",
+        "Log every batch: date, salt or brine, temperature, pH, and visual cues.",
+        "When in doubt, discard. Discard is a valid batch outcome."
+      ],
+      "never": [
+        "Never use a pleasant smell to overrule mould, slime, or a pH above 4.6 in a low-acid ferment.",
+        "Never sell or serve a batch you cannot trace.",
+        "Never compare readings from a different array or rig."
+      ]
+    },
+    {
+      "type": "metrics",
+      "title": "What this workspace is allowed to claim",
+      "items": [
+        {
+          "label": "Array can do",
+          "value": "Change detection",
+          "hint": "Same array, same sample prep, against your own reference blank."
+        },
+        {
+          "label": "Array cannot do",
+          "value": "Safety verdict",
+          "hint": "No pathogen, toxin, or “safe to eat” call. Ever."
+        },
+        {
+          "label": "Primary controls",
+          "value": "pH · time · temp",
+          "hint": "These decide. The nose only flags that something changed."
+        }
+      ]
+    },
+    {
+      "type": "diagram",
+      "art": "fermentation",
+      "title": "The vessel, as a checklist",
+      "caption": "Click a point. Every point is a place where a clean batch can turn into a risk.",
+      "hotspots": [
+        {
+          "id": "airlock",
+          "label": "Airlock",
+          "x": 50,
+          "y": 12,
+          "severity": "info",
+          "body": "Gas should escape, not pressurise. Check the seal and keep the airlock clean. A dry airlock is not proof of safety."
+        },
+        {
+          "id": "lid",
+          "label": "Lid / seal",
+          "x": 50,
+          "y": 28,
+          "severity": "warn",
+          "body": "A sealed anaerobic vessel is exactly why low-acid ferments need a proven recipe and pH control. Do not improvise a low-acid anaerobic batch."
+        },
+        {
+          "id": "brine",
+          "label": "Brine line",
+          "x": 50,
+          "y": 50,
+          "severity": "info",
+          "body": "Keep solids submerged. A surface exposed to air is a mould opportunity, not a flavour choice."
+        },
+        {
+          "id": "liquid",
+          "label": "Active ferment",
+          "x": 50,
+          "y": 70,
+          "severity": "info",
+          "body": "Bubbles and cloudiness are process cues. They are not a safety certificate. Log them with pH and temperature."
+        },
+        {
+          "id": "sensor",
+          "label": "Sensor port",
+          "x": 77,
+          "y": 60,
+          "severity": "warn",
+          "body": "Use the array as a change detector against a clean reference on the same channels. Ethanol and acids can dominate the response; high VOC can saturate or poison MOX sensors."
+        }
+      ]
+    },
+    {
+      "type": "timeline",
+      "title": "A simple fermentation rhythm",
+      "steps": [
+        {
+          "label": "Prep",
+          "range": "Day 0",
+          "body": "Clean the vessel and hands. Weigh salt or measure brine. Label the batch. Record starting pH and temperature."
+        },
+        {
+          "label": "Lag",
+          "range": "Day 1–3",
+          "body": "Bubbles may be quiet. Keep solids submerged. Log pH, temperature, smell, and anything visible.",
+          "warn": "No bubbles at day 3 is a prompt to verify pH and temperature, not to assume it is safe."
+        },
+        {
+          "label": "Active",
+          "range": "Day 4–10",
+          "body": "Acidity should move toward the recipe target. Keep temperature stable. Off-odours, slime, or fuzzy growth are stop signals."
+        },
+        {
+          "label": "Finish",
+          "range": "Recipe end",
+          "body": "Chill or package exactly as the tested recipe says. Keep the batch record. Smell never overrides the recipe."
+        }
+      ]
+    },
+    {
+      "type": "tracking",
+      "title": "Batch log",
+      "description": "The log is the valuable object. The sensor reading is one column, not the verdict.",
+      "fields": [
+        {
+          "id": "batch",
+          "label": "Batch name",
+          "type": "text",
+          "placeholder": "Sauerkraut #4"
+        },
+        {
+          "id": "started",
+          "label": "Started",
+          "type": "date"
+        },
+        {
+          "id": "recipe",
+          "label": "Recipe / salt",
+          "type": "text",
+          "placeholder": "2.5% salt by weight"
+        },
+        {
+          "id": "style",
+          "label": "Ferment type",
+          "type": "select",
+          "options": ["low-acid", "high-acid", "other"]
+        },
+        {
+          "id": "target",
+          "label": "Target pH",
+          "type": "number",
+          "placeholder": "3.8"
+        }
+      ],
+      "logFields": [
+        {
+          "id": "day",
+          "label": "Day",
+          "type": "number",
+          "placeholder": "3"
+        },
+        {
+          "id": "ph",
+          "label": "pH",
+          "type": "number",
+          "placeholder": "4.1"
+        },
+        {
+          "id": "temp",
+          "label": "Temp",
+          "type": "number",
+          "unit": "°C",
+          "placeholder": "21"
+        },
+        {
+          "id": "smell",
+          "label": "Smell note",
+          "type": "text",
+          "placeholder": "sour, cabbage, clean"
+        },
+        {
+          "id": "visual",
+          "label": "Visual note",
+          "type": "text",
+          "placeholder": "cloudy brine, no surface growth"
+        },
+        {
+          "id": "fault",
+          "label": "Visible fault",
+          "type": "select",
+          "options": [
+            "none",
+            "mould",
+            "slime",
+            "rope",
+            "other"
+          ]
+        },
+        {
+          "id": "action",
+          "label": "Action",
+          "type": "select",
+          "options": [
+            "none",
+            "verify pH",
+            "chill",
+            "discard"
+          ]
+        }
+      ],
+      "logLabel": "Add reading"
+    },
+    {
+      "type": "chart",
+      "title": "pH trajectory",
+      "yLabel": "pH",
+      "logField": "ph",
+      "demo": [
+        {
+          "x": 0,
+          "y": 6.2
+        },
+        {
+          "x": 1,
+          "y": 5.8
+        },
+        {
+          "x": 2,
+          "y": 5.1
+        },
+        {
+          "x": 3,
+          "y": 4.5
+        },
+        {
+          "x": 4,
+          "y": 4.1
+        },
+        {
+          "x": 5,
+          "y": 3.8
+        }
+      ],
+      "note": "The line is your log. The example is not a target and not a safety curve. Follow the recipe and measure pH."
+    },
+    {
+      "type": "rules",
+      "title": "Stop rules",
+      "rules": [
+        {
+          "when": "pH above 4.6 after 48 h in a low-acid ferment",
+          "then": "Stop. Chill or discard per the recipe; verify with a calibrated meter. Do not rely on smell.",
+          "severity": "stop"
+        },
+        {
+          "when": "Fuzzy, pink, black, or blue mould",
+          "then": "Discard. Do not salvage by removing the surface. Toxins can be invisible.",
+          "severity": "stop"
+        },
+        {
+          "when": "Slime, rope, or a foul turn in the smell",
+          "then": "Discard. Do not taste.",
+          "severity": "stop"
+        },
+        {
+          "when": "No bubbles, no acidity, warm room, day 3",
+          "then": "Treat as stalled or risky. Verify pH and temperature; do not assume it is safe.",
+          "severity": "warn"
+        },
+        {
+          "when": "Clean sour smell, pH in target, no visible faults",
+          "then": "Continue the protocol. This is not a safety certificate.",
+          "severity": "info"
+        }
+      ]
+    },
+    {
+      "type": "checklist",
+      "title": "Before you taste",
+      "items": [
+        {
+          "id": "clean",
+          "label": "Vessel and hands clean",
+          "detail": "No residue, no cracks, no exposed surfaces."
+        },
+        {
+          "id": "ph",
+          "label": "pH meter calibrated",
+          "detail": "A reading you do not trust is worse than no reading."
+        },
+        {
+          "id": "salt",
+          "label": "Salt or brine measured by weight",
+          "detail": "Volume spoons drift; weight is reproducible."
+        },
+        {
+          "id": "label",
+          "label": "Batch labelled",
+          "detail": "Date, recipe, salt %, start temperature."
+        },
+        {
+          "id": "temp",
+          "label": "Temperature logged",
+          "detail": "Warm is faster, not automatically safer."
+        },
+        {
+          "id": "discard",
+          "label": "Discard rule understood",
+          "detail": "Decide now, not when the batch is emotionally valuable."
+        }
+      ]
+    },
+    {
+      "type": "docs",
+      "title": "Field notes"
+    },
+    {
+      "type": "rig",
+      "title": "Use this with your rig",
+      "body": "Record a clean reference blank, then a batch sample on the same channels and sample prep. Compare with Check. If the arrays differ, the app will refuse the comparison.",
+      "cta": "Open Check"
+    }
+  ],
+  "docs": [
+    {
+      "id": "how",
+      "title": "How to use this workspace",
+      "body": [
+        "Start one batch. Fill the batch fields, then add a reading whenever you measure pH, temperature, or inspect the vessel.",
+        "The array is a change detector: capture a clean reference and a sample on the same array, then compare them in Check. Do not compare a batch from one rig with a reference from another.",
+        "The stop rules are deliberately conservative. A sensor reading cannot clear a batch; it can only add a prompt to look, measure, or discard."
+      ]
+    },
+    {
+      "id": "sensor",
+      "title": "What the sensor is actually doing",
+      "body": [
+        "A MOX array responds to a mixture of volatile compounds. Ethanol, organic acids, and other fermentation products can dominate the response, and high concentrations can saturate or poison a sensor.",
+        "The useful signal is a change relative to a reference on the same array. The absolute number is not concentration and is not comparable across rigs.",
+        "Humidity, temperature, sample distance, and vessel headspace all change the reading. Log them as context, not as afterthoughts."
+      ]
+    },
+    {
+      "id": "risk",
+      "title": "What can go wrong",
+      "body": [
+        "Low-acid, anaerobic ferments can support Clostridium botulinum growth. Smell is not a reliable botulinum test. Follow a tested recipe, use a calibrated pH meter, and respect the pH 4.6 boundary for low-acid foods.",
+        "Moulds can produce mycotoxins that are not removed by scraping the surface. Discard fuzzy or coloured growth.",
+        "Cross-contamination from hands, utensils, or an airlock turns a clean batch into an uncontrolled one.",
+        "A drifted or saturated sensor can make a changing batch look stable. The log and the primary measurements matter more than the trace."
+      ]
+    },
+    {
+      "id": "validate",
+      "title": "How to validate a Vial on your rig",
+      "body": [
+        "Record a clean reference blank and at least three batch samples on the same array, with the same sample preparation and distance.",
+        "Use Check to compare the reference and the batch. Read the lower bound and the permutation p-value, not just the badge.",
+        "A sealed Vial is a claim about a closed-set comparison on the array that produced the evidence. It is not a transferable calibration and it is not a safety certification."
+      ]
+    },
+    {
+      "id": "clean",
+      "title": "Cleaning and traceability",
+      "body": [
+        "Clean the vessel, lid, airlock, weights, and hands before the batch. Keep raw and finished batches separate.",
+        "Label every batch with date, recipe, salt or brine, and starting temperature. A batch you cannot trace is a batch you cannot debug."
+      ]
+    },
+    {
+      "id": "refs",
+      "title": "References",
+      "body": [
+        "FDA. Bad Bug Book: Foodborne Pathogenic Microorganisms and Natural Toxins, 2nd ed. (2012).",
+        "USDA. Complete Guide to Home Canning (2015).",
+        "Codex Alimentarius. General Principles of Food Hygiene (CXC 1-1969, rev.).",
+        "21 CFR 114 / FDA acidified foods guidance: pH 4.6 is the botulism-control boundary for low-acid foods.",
+        "These are references for the safety context, not an endorsement of this Vial or a substitute for local food-safety guidance."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,531 @@
+<style>
+.fhome {
+  --liquid: hsl(38 18% 62%);
+  --bubble-opacity: .18;
+  --bubble-duration: 7s;
+  --bubble-play: paused;
+  display: grid;
+  grid-template-columns: 218px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 420px;
+  padding: 12px 14px 14px;
+  background: var(--paper, #f7f2e8);
+  color: var(--ink, #2c2821);
+}
+.fhome * { box-sizing: border-box; }
+.fhome-tank {
+  position: relative;
+  min-height: 392px;
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 50% 24%, rgba(255,255,255,.7), transparent 58%),
+    var(--panel);
+  overflow: hidden;
+}
+.fhome-tank.stop { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red-soft); }
+.fhome-tank.warn { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber-soft); }
+.fhome-tank svg { display: block; width: 100%; height: 292px; }
+.fhome-tank-copy { padding: 0 12px 12px; }
+.fhome-tank-copy .eyebrow { margin-bottom: 2px; }
+.fhome-activity { display: flex; align-items: baseline; gap: 6px; margin: 1px 0 4px; }
+.fhome-activity b { font-family: var(--mono); font-size: 20px; line-height: 1; letter-spacing: -.03em; }
+.fhome-activity span { font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
+.fhome-note { color: var(--muted); font-size: 9px; line-height: 1.45; }
+.fhome-main { display: grid; grid-template-rows: auto auto 150px auto; gap: 9px; min-width: 0; }
+.fhome-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fhome-head h1 { margin: 2px 0 2px; font-size: 24px; line-height: 1.02; letter-spacing: -.03em; font-weight: 650; }
+.fhome-head .sub { color: var(--muted); font-size: 10px; }
+.fhome-actions { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.fhome-actions button, .fhome-quick button { font-size: 9px; }
+.fhome-stats { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; }
+.fhome-stat {
+  min-width: 84px; flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.fhome-stat .k { display: block; font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.fhome-stat .v { display: block; margin-top: 2px; font-family: var(--mono); font-size: 13px; font-weight: 650; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fhome-stat .v small { font-size: 8px; font-weight: 400; color: var(--muted); }
+.fhome-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 7px; border: 1px solid var(--line-strong); border-radius: 999px;
+  font-family: var(--mono); font-size: 7px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); white-space: nowrap;
+}
+.fhome-pill.good { color: var(--green); border-color: #9fceb9; background: var(--green-soft); }
+.fhome-pill.warn { color: var(--amber); border-color: #e3c78a; background: var(--amber-soft); }
+.fhome-pill.stop { color: var(--red); border-color: #e6b6bc; background: var(--red-soft); }
+.fhome-pill.info { color: var(--cyan); border-color: #a8d4de; background: var(--cyan-soft); }
+.fhome-trajectory {
+  position: relative;
+  height: 150px;
+  min-height: 0;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.fhome-trajectory-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  flex: 0 0 auto;
+  padding: 6px 8px 0;
+}
+.fhome-trajectory-head .stamp { font-family: var(--mono); font-size: 7px; color: var(--muted-2); }
+#liveChart { display: block; width: 100%; height: auto; min-height: 0; flex: 1 1 auto; }
+.fhome-bottom { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 1.05fr); gap: 9px; align-items: start; }
+.fhome-status { padding: 7px 9px; border: 1px solid var(--line); border-left: 3px solid var(--line-strong); background: var(--panel); min-width: 0; }
+.fhome-status.good { border-left-color: var(--green); }
+.fhome-status.warn { border-left-color: var(--amber); }
+.fhome-status.stop { border-left-color: var(--red); }
+.fhome-status.info { border-left-color: var(--cyan); }
+.fhome-status .label { font-size: 13px; font-weight: 650; line-height: 1.1; margin: 1px 0 2px; }
+.fhome-status .copy { font-size: 9px; line-height: 1.4; color: var(--muted); }
+.fhome-status .stamp { margin-top: 5px; font-family: var(--mono); font-size: 7px; color: var(--muted-2); line-height: 1.4; }
+.fhome-quick { display: grid; grid-template-columns: 42px 58px 58px minmax(72px, 1fr) auto; gap: 5px; align-items: end; padding: 7px 8px; border: 1px solid var(--line); background: var(--panel); }
+.fhome-quick label { min-width: 0; }
+.fhome-quick .k { display: block; margin-bottom: 2px; font-family: var(--mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); }
+.fhome-quick input, .fhome-quick select { width: 100%; font-size: 9px; padding: 4px 5px; }
+.fhome-quick button { align-self: end; white-space: nowrap; }
+.fhome-source { display: flex; align-items: center; gap: 5px; }
+.fhome-source select { max-width: 150px; font-size: 8px; }
+.fhome-empty { padding: 10px; border: 1px dashed var(--line-strong); color: var(--muted); font-size: 9px; }
+@media (max-width: 760px) {
+  .fhome { grid-template-columns: 1fr; min-height: 0; }
+  .fhome-tank { min-height: 0; }
+  .fhome-tank svg { height: 190px; }
+  .fhome-main { grid-template-rows: auto auto 130px auto; }
+  .fhome-trajectory { height: 130px; }
+  .fhome-bottom { grid-template-columns: 1fr; }
+  .fhome-quick { grid-template-columns: 1fr 1fr 1fr; }
+  .fhome-quick button { grid-column: 1 / -1; }
+}
+</style>
+
+<div class="fhome">
+  <aside class="fhome-tank">
+    <svg id="tank" viewBox="0 0 220 300" role="img" aria-label="Fermentation vessel with bubbles driven by array activity">
+      <defs>
+        <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".55" />
+          <stop offset="1" stop-color="#d8cdbd" stop-opacity=".12" />
+        </linearGradient>
+        <clipPath id="liquidClip">
+          <rect x="53" y="120" width="114" height="132" rx="14" />
+        </clipPath>
+      </defs>
+      <rect x="45" y="35" width="130" height="225" rx="20" fill="url(#glass)" stroke="#b9ab95" stroke-width="2" />
+      <rect x="70" y="22" width="80" height="18" rx="5" fill="#d9cfbf" stroke="#a99a83" stroke-width="1.4" />
+      <path d="M110 22 L110 8 Q110 2 120 2" fill="none" stroke="#8a7f6c" stroke-width="2" stroke-linecap="round" />
+      <rect x="53" y="120" width="114" height="132" rx="14" fill="var(--liquid)" opacity=".82" />
+      <ellipse cx="110" cy="120" rx="57" ry="8" fill="var(--liquid)" opacity=".95" />
+      <g clip-path="url(#liquidClip)">
+        <circle class="bubble" cx="74" cy="238" r="4.2" style="--delay:-.2s" />
+        <circle class="bubble" cx="92" cy="246" r="3.1" style="--delay:-1.4s" />
+        <circle class="bubble" cx="108" cy="240" r="5.2" style="--delay:-2.6s" />
+        <circle class="bubble" cx="126" cy="247" r="3.6" style="--delay:-.9s" />
+        <circle class="bubble" cx="142" cy="239" r="4.4" style="--delay:-3.2s" />
+        <circle class="bubble" cx="84" cy="250" r="2.5" style="--delay:-3.8s" />
+        <circle class="bubble" cx="118" cy="251" r="2.8" style="--delay:-4.4s" />
+        <circle class="bubble" cx="150" cy="248" r="2.6" style="--delay:-2.1s" />
+      </g>
+      <path d="M45 120 Q110 108 175 120" fill="none" stroke="#f7f2e8" stroke-width="1.2" opacity=".55" />
+      <rect x="45" y="35" width="130" height="225" rx="20" fill="none" stroke="#8a7f6c" stroke-width="1" opacity=".5" />
+      <text x="110" y="280" text-anchor="middle" font-family="monospace" font-size="8" fill="#8a7f6c">SAME-ARRAY VESSEL</text>
+    </svg>
+    <div class="fhome-tank-copy">
+      <div class="eyebrow">ARRAY ACTIVITY</div>
+      <div class="fhome-activity"><b id="activityValue">—</b><span id="activityUnit">idle</span></div>
+      <div class="fhome-note" id="tankNote">Bubble rate is derived from movement on this array, not CO₂. The liquid tint is the last logged pH, not a measurement.</div>
+    </div>
+  </aside>
+
+  <main class="fhome-main">
+    <header class="fhome-head">
+      <div>
+        <div class="eyebrow">FERMENTATION LAB · HOME <span class="fhome-pill" id="sourcePill">NO SENSOR</span></div>
+        <h1 id="batchName">Batch cockpit</h1>
+        <div class="sub" id="batchSub">The log is the product. The array is one change detector inside it.</div>
+      </div>
+      <div class="fhome-actions">
+        <button type="button" data-action="open-workspace">Workspace →</button>
+        <button type="button" data-action="open-check">Check</button>
+        <button type="button" data-action="export-log">Export log</button>
+        <button type="button" data-action="open-datasets">Datasets</button>
+      </div>
+    </header>
+
+    <div class="fhome-stats">
+      <div class="fhome-stat"><span class="k">Quick status</span><span class="v"><span class="fhome-pill info" id="statusPill">NOT STARTED</span></span></div>
+      <div class="fhome-stat"><span class="k">Batch day</span><span class="v" id="dayValue">—</span></div>
+      <div class="fhome-stat"><span class="k">pH / target</span><span class="v" id="phValue">—</span></div>
+      <div class="fhome-stat"><span class="k">Temperature</span><span class="v" id="tempValue">—</span></div>
+      <div class="fhome-stat"><span class="k">Readings</span><span class="v" id="logValue">0</span></div>
+    </div>
+
+    <section class="fhome-trajectory" aria-label="Live array response trajectory">
+      <div class="fhome-trajectory-head">
+        <span class="eyebrow">LIVE ARRAY RESPONSE</span>
+        <span class="fhome-source"><select id="sourceSelect" aria-label="Sensor data source"></select><span class="stamp" id="seriesStamp">no live window</span></span>
+      </div>
+      <svg id="liveChart" viewBox="0 0 520 130" preserveAspectRatio="none" role="img" aria-label="Live normalized array response"></svg>
+    </section>
+
+    <div class="fhome-bottom">
+      <section class="fhome-status info" id="statusCard">
+        <div class="eyebrow">PRIMARY CONTROLS</div>
+        <div class="label" id="statusLabel">Not started</div>
+        <div class="copy" id="statusCopy">Add a reading to start the batch clock. The workspace holds the full log and stop rules.</div>
+        <div class="stamp">Quick status only · the log and recipe decide. pH, temperature, ferment type, target, and structured visible faults are the inputs. A pleasant smell cannot clear a batch.</div>
+      </section>
+
+      <form class="fhome-quick" id="quickLog">
+        <label><span class="k">Day</span><input name="day" type="number" step="1" min="0" placeholder="—" /></label>
+        <label><span class="k">pH</span><input name="ph" type="number" step="0.01" min="0" max="14" placeholder="4.1" /></label>
+        <label><span class="k">°C</span><input name="temp" type="number" step="0.1" placeholder="21" /></label>
+        <label><span class="k">Fault</span><select name="fault"><option value="none">none</option><option value="mould">mould</option><option value="slime">slime</option><option value="rope">rope</option><option value="other">other</option></select></label>
+        <button class="primary" type="button" id="quickLogSubmit">Log reading</button>
+      </form>
+    </div>
+  </main>
+</div>
+
+<style>
+.bubble {
+  fill: #fffdf8;
+  opacity: var(--bubble-opacity);
+  animation: fhome-rise var(--bubble-duration) linear infinite;
+  animation-delay: var(--delay, 0s);
+  animation-play-state: var(--bubble-play);
+}
+@keyframes fhome-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: var(--bubble-opacity); }
+  100% { transform: translateY(-112px); opacity: 0; }
+}
+</style>
+
+<script>
+(function () {
+  "use strict";
+  var bridge = window.osmograph;
+  var data = null;
+  var $ = function (sel) { return document.querySelector(sel); };
+  var SVG = "http://www.w3.org/2000/svg";
+
+  function num(v) {
+    if (v === null || v === undefined || v === "") return null;
+    var n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  function fieldValue(key) {
+    var f = data && data.domain && data.domain.fields ? data.domain.fields[key] : "";
+    return f === undefined || f === null ? "" : String(f);
+  }
+  function sortedLogs() {
+    if (!data || !data.domain || !data.domain.logs) return [];
+    return data.domain.logs.slice().sort(function (a, b) {
+      var da = num(a.values.day), db = num(b.values.day);
+      if (da !== null && db !== null && da !== db) return da - db;
+      return a.at - b.at;
+    });
+  }
+  function latestLog(logs) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      if (Object.keys(logs[i].values || {}).length) return logs[i];
+    }
+    return null;
+  }
+  function latestValue(logs, key) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      var v = num(logs[i].values[key]);
+      if (v !== null) return v;
+    }
+    return null;
+  }
+  function maxDay(logs) {
+    var best = null;
+    logs.forEach(function (l) {
+      var d = num(l.values.day);
+      if (d !== null) best = best === null ? d : Math.max(best, d);
+    });
+    return best === null ? 0 : best;
+  }
+  function dateDay(value) {
+    if (!value) return null;
+    var start = new Date(String(value) + "T00:00:00");
+    if (!Number.isFinite(start.getTime())) return null;
+    var now = new Date();
+    var today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    var then = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
+    var day = Math.floor((today - then) / 86400000);
+    return day >= 0 ? day : null;
+  }
+  function currentDay(logs) {
+    var logged = maxDay(logs);
+    var started = dateDay(fieldValue("started"));
+    return started !== null ? Math.max(logged, started) : logged;
+  }
+  function hasDiscard(logs) {
+    return logs.some(function (l) { return String(l.values.action || "").toLowerCase() === "discard"; });
+  }
+  function latestFault(logs) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      var f = String(logs[i].values.fault || "").trim().toLowerCase();
+      if (f) return f;
+    }
+    return "";
+  }
+  function quickStatus(logs) {
+    var target = num(fieldValue("target"));
+    var style = fieldValue("style").toLowerCase();
+    var day = currentDay(logs);
+    var ph = latestValue(logs, "ph");
+    var temp = latestValue(logs, "temp");
+    var fault = latestFault(logs);
+    var latest = latestLog(logs);
+    if (!logs.length && dateDay(fieldValue("started")) === null) {
+      return { tone: "info", label: "Not started", copy: "Add a reading to start the batch clock. The workspace holds the full log and stop rules." };
+    }
+    if (hasDiscard(logs)) {
+      return { tone: "stop", label: "Discard recorded", copy: "The log records a discard. Do not taste or serve it. Follow your discard procedure." };
+    }
+    if (fault === "mould" || fault === "slime" || fault === "rope") {
+      return { tone: "stop", label: "Visible fault", copy: "A structured visible fault is recorded. The array cannot overrule it. Discard; do not taste." };
+    }
+    if (fault === "other") {
+      return { tone: "warn", label: "Unclassified fault", copy: "A visible fault is recorded but not classified. Inspect and follow the tested recipe's discard rule." };
+    }
+    if (style === "low-acid" && ph !== null && ph > 4.6 && day >= 2) {
+      return { tone: "stop", label: "Above 4.6", copy: "Low-acid ferment above the 4.6 boundary after day 2. Verify with a calibrated meter and stop." };
+    }
+    if (!style && ph !== null && ph > 4.6 && day >= 2) {
+      return { tone: "warn", label: "Ferment type not set", copy: "If this is a low-acid ferment, the logged pH is above 4.6. Select the type or follow the tested recipe." };
+    }
+    if (target === null) {
+      return { tone: "warn", label: "Target not set", copy: "Set the recipe target pH before relying on the verdict. The app will not invent one." };
+    }
+    if (!style) {
+      return { tone: "warn", label: "Ferment type not set", copy: "Choose low-acid, high-acid, or other so the correct boundary is applied." };
+    }
+    if (ph === null) {
+      return { tone: "warn", label: "pH missing", copy: "The log has no pH reading. The sensor cannot stand in for the primary control." };
+    }
+    if (temp === null) {
+      return { tone: "warn", label: "Temperature missing", copy: "The log has no temperature reading. Temperature changes the rate, not the safety boundary." };
+    }
+    if (temp < 10 || temp > 30) {
+      return { tone: "warn", label: "Temperature outside 10–30 °C", copy: "Verify the tested recipe's temperature range and confirm the vessel temperature." };
+    }
+    if (latest && !String(latest.values.fault || "").trim()) {
+      return { tone: "warn", label: "Fault field missing", copy: "This reading predates the structured visible-fault field. Add a new reading with a visible-fault choice." };
+    }
+    if (ph <= target) {
+      return { tone: "good", label: "At target", copy: "The logged pH is at or below your target. Hold the recipe; this is not a safety certificate." };
+    }
+    return { tone: "info", label: "Active", copy: "The logged pH is above target. Keep the temperature stable and measure pH again on schedule." };
+  }
+  function phColor(ph) {
+    if (ph === null) return "hsl(38 18% 62%)";
+    var hue, sat, light;
+    if (ph <= 4.6) {
+      var a = Math.max(0, Math.min(1, (ph - 3.0) / 1.6));
+      hue = 168 - 130 * a;
+      sat = 45 + 25 * a;
+      light = 40 + 10 * a;
+    } else {
+      var b = Math.max(0, Math.min(1, (ph - 4.6) / 2.4));
+      hue = 38 - 18 * b;
+      sat = 70 - 15 * b;
+      light = 50 - 8 * b;
+    }
+    return "hsl(" + hue.toFixed(0) + " " + sat.toFixed(0) + "% " + light.toFixed(0) + "%)";
+  }
+  function normalizedSeries(series) {
+    if (!series || !series.values || !series.values.length) return [];
+    var length = 0;
+    series.values.forEach(function (channel) { length = Math.max(length, channel.length); });
+    var z = [];
+    for (var i = 0; i < length; i++) z.push([]);
+    series.values.forEach(function (channel) {
+      var finite = channel.filter(function (v) { return v !== null && Number.isFinite(v); });
+      if (finite.length < 4) return;
+      var mean = finite.reduce(function (a, b) { return a + b; }, 0) / finite.length;
+      var variance = finite.reduce(function (a, b) { return a + (b - mean) * (b - mean); }, 0) / finite.length;
+      var sd = Math.sqrt(variance);
+      if (!Number.isFinite(sd) || sd < 1e-9) return;
+      channel.forEach(function (v, idx) {
+        if (v !== null && Number.isFinite(v)) z[idx].push((v - mean) / sd);
+      });
+    });
+    var out = [];
+    z.forEach(function (values) {
+      if (!values.length) return;
+      out.push(values.reduce(function (a, b) { return a + b; }, 0) / values.length);
+    });
+    return out.slice(-180);
+  }
+  function activityOf(series) {
+    var line = normalizedSeries(series);
+    if (line.length < 4) return 0;
+    var sum = 0, count = 0;
+    for (var i = 1; i < line.length; i++) {
+      sum += Math.abs(line[i] - line[i - 1]);
+      count++;
+    }
+    return Math.max(0, Math.min(1, (count ? sum / count : 0) * 2.4));
+  }
+  function drawChart(series) {
+    var svg = $("#liveChart");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    var rect = svg.getBoundingClientRect();
+    var W = Math.max(320, Math.round(rect.width || 520));
+    var H = Math.max(100, Math.round(rect.height || 130));
+    var L = 8, R = 8, T = 8, B = 16;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var line = normalizedSeries(series);
+    if (!line.length) {
+      svg.appendChild(svgEl("text", { x: W / 2, y: H / 2, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 10 }, "No live window. The batch log still works without a sensor."));
+      return;
+    }
+    var min = Math.min.apply(null, line);
+    var max = Math.max.apply(null, line);
+    var span = Math.max(1e-6, max - min);
+    var x = function (i) { return L + (i / Math.max(1, line.length - 1)) * (W - L - R); };
+    var y = function (v) { return T + (1 - (v - min) / span) * (H - T - B); };
+    for (var g = 0; g <= 3; g++) {
+      var yy = T + (g / 3) * (H - T - B);
+      svg.appendChild(svgEl("line", { x1: L, y1: yy, x2: W - R, y2: yy, stroke: "#e6dccd", "stroke-width": 1 }));
+    }
+    var zero = y(0);
+    if (zero >= T && zero <= H - B) {
+      svg.appendChild(svgEl("line", { x1: L, y1: zero, x2: W - R, y2: zero, stroke: "#b9ab95", "stroke-width": 1, "stroke-dasharray": "3 4" }));
+    }
+    var path = line.map(function (v, i) { return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); }).join(" ");
+    svg.appendChild(svgEl("path", { d: path + " L" + x(line.length - 1).toFixed(1) + " " + (H - B) + " L" + L + " " + (H - B) + " Z", fill: "rgba(14,116,144,.10)", stroke: "none" }));
+    svg.appendChild(svgEl("path", { d: path, fill: "none", stroke: "#0e7490", "stroke-width": 1.8, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    var lastX = x(line.length - 1), lastY = y(line[line.length - 1]);
+    svg.appendChild(svgEl("circle", { cx: lastX.toFixed(1), cy: lastY.toFixed(1), r: 3.2, fill: "#0e7490", stroke: "#fffdf8", "stroke-width": 1 }));
+    svg.appendChild(svgEl("text", { x: L, y: H - 3, fill: "#8a7f6c", "font-size": 8, "font-family": "monospace" }, "z-scored mean · last " + line.length + " points"));
+  }
+  function svgEl(name, attrs, text) {
+    var el = document.createElementNS(SVG, name);
+    if (attrs) Object.keys(attrs).forEach(function (k) { el.setAttribute(k, String(attrs[k])); });
+    if (text !== undefined) el.textContent = text;
+    return el;
+  }
+  function renderSources() {
+    var select = $("#sourceSelect");
+    var sources = (data && data.sources) || [];
+    var wanted = sources.map(function (s) { return s.id; }).join("|");
+    var existing = Array.prototype.map.call(select.options, function (o) { return o.value; }).join("|");
+    if (existing !== wanted) {
+      select.textContent = "";
+      sources.forEach(function (s) {
+        var o = document.createElement("option");
+        o.value = s.id;
+        o.textContent = s.label;
+        select.appendChild(o);
+      });
+    }
+    if (data && data.selectedSource) select.value = data.selectedSource;
+  }
+  function render() {
+    if (!data) return;
+    var logs = sortedLogs();
+    var fields = (data.domain && data.domain.fields) || {};
+    var ph = latestValue(logs, "ph");
+    var temp = latestValue(logs, "temp");
+    var target = num(fields.target);
+    var status = quickStatus(logs);
+    var day = currentDay(logs);
+    var activity = activityOf(data.series);
+    var tankShell = document.querySelector(".fhome-tank");
+    if (tankShell) tankShell.className = "fhome-tank " + status.tone;
+    var tank = $("#tank");
+    tank.style.setProperty("--liquid", phColor(ph));
+    tank.style.setProperty("--bubble-opacity", data.series ? (0.22 + activity * 0.62).toFixed(2) : ".12");
+    tank.style.setProperty("--bubble-duration", data.series ? (5.2 - activity * 3.6).toFixed(2) + "s" : "7s");
+    tank.style.setProperty("--bubble-play", data.series ? "running" : "paused");
+
+    setText("activityValue", data.series ? (activity * 100).toFixed(0) + "%" : "—");
+    setText("activityUnit", data.series ? (activity > 0.62 ? "moving" : activity > 0.22 ? "active" : "quiet") : "idle");
+    setText("batchName", fieldValue("batch") || "Batch cockpit");
+    setText("batchSub", fieldValue("recipe") ? fieldValue("recipe") + " · " + (fieldValue("style") || "type not set") : "The log is the product. The array is one change detector inside it.");
+    setText("dayValue", logs.length || dateDay(fields.started) !== null ? "D" + day : "—");
+    setText("phValue", (ph !== null ? ph.toFixed(2) : "—") + (target !== null ? " / " + target.toFixed(2) : " / —"));
+    setText("tempValue", temp !== null ? temp.toFixed(1) + " °C" : "—");
+    setText("logValue", String(logs.length));
+    var pill = $("#statusPill");
+    pill.className = "fhome-pill " + status.tone;
+    pill.textContent = status.label;
+    var card = $("#statusCard");
+    card.className = "fhome-status " + status.tone;
+    setText("statusLabel", status.label);
+    setText("statusCopy", status.copy);
+    var sourcePill = $("#sourcePill");
+    sourcePill.textContent = data.series ? (data.series.source === "live" ? "LIVE ARRAY" : "RECORDING") : "NO SENSOR";
+    sourcePill.className = "fhome-pill " + (data.series ? "good" : "");
+    setText("seriesStamp", data.series ? data.series.channels.length + " ch · " + String(data.series.label || "").slice(0, 24) : "no live window");
+    setText("tankNote", data.series
+      ? "Bubble rate is derived from movement on this array, not CO₂. Liquid tint is the last logged pH, not a measurement."
+      : "No live array. The batch log and quick status still work; bubbles idle until a source is available.");
+    renderSources();
+    drawChart(data.series);
+    var dayInput = $("#quickLog [name=day]");
+    if (dayInput && document.activeElement !== dayInput && !dayInput.value) {
+      var started = dateDay(fields.started);
+      dayInput.value = String(started !== null ? day : maxDay(logs) + 1);
+    }
+  }
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+  bridge.onData(function (payload) {
+    data = payload;
+    render();
+  });
+  document.querySelectorAll("[data-action]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      bridge.action({ type: button.dataset.action });
+    });
+  });
+  $("#sourceSelect").addEventListener("change", function (event) {
+    bridge.action({ type: "set-source", source: event.target.value });
+  });
+  function submitQuickLog() {
+    var formEl = $("#quickLog");
+    var form = new FormData(formEl);
+    var values = {};
+    form.forEach(function (value, key) {
+      if (String(value).trim()) values[key] = String(value).trim();
+    });
+    if (!Object.keys(values).length) {
+      bridge.toast("Add at least one value to the reading.");
+      return;
+    }
+    bridge.action({ type: "add-log", values: values });
+    bridge.toast("Reading added to the local log.");
+    formEl.reset();
+    var logs = sortedLogs();
+    var fields = (data && data.domain && data.domain.fields) || {};
+    var dayInput = formEl.querySelector('[name="day"]');
+    if (dayInput) dayInput.value = String(dateDay(fields.started) !== null ? currentDay(logs) : maxDay(logs) + 1);
+  }
+  $("#quickLogSubmit").addEventListener("click", submitQuickLog);
+  $("#quickLog").addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submitQuickLog();
+    }
+  });
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      if (data) drawChart(data.series);
+    }).observe($("#liveChart"));
+  }
+  bridge.ready();
+})();
+</script>
