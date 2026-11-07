@@ -1,5 +1,5 @@
 <style>
-.ferm { max-width: 1280px; margin: 0 auto; padding: 14px 16px 26px; }
+.ferm { max-width: 1320px; margin: 0 auto; padding: 14px 16px 26px; }
 .hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .hero-main { min-width: 0; flex: 1; }
 .hero h1 { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
@@ -8,13 +8,15 @@
 .batch-setup { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 9px; }
 .batch-setup label { min-width: 130px; }
 .batch-setup input, .batch-setup select { width: 100%; }
-.phase-strip { display: flex; align-items: center; gap: 12px; padding: 9px 0 11px; border-bottom: 1px solid var(--line); }
+
+.phase-strip { display: flex; align-items: center; gap: 12px; padding: 9px 0 11px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .phase-pill { font-family: var(--mono); font-size: 9px; font-weight: 650; letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--line-strong); border-radius: 999px; color: var(--muted); white-space: nowrap; }
 .phase-pill.good { color: var(--green); border-color: #9fceb9; background: var(--green-soft); }
 .phase-pill.warn { color: var(--amber); border-color: #e3c78a; background: var(--amber-soft); }
-.phase-pill.stop { color: var(--red); border-color: #e6b6bc; background: var(--red-soft); }
-.phase-copy { color: var(--muted); font-size: 10px; flex: 1; }
+.phase-pill.live { color: var(--cyan); border-color: #7fc3d2; background: var(--cyan-soft); }
+.phase-copy { color: var(--muted); font-size: 10px; flex: 1 1 320px; }
 .phase-score { font-family: var(--mono); font-size: 8px; color: var(--muted-2); white-space: nowrap; }
+
 .grid { margin-top: 11px; }
 .chart-wrap { height: 260px; border: 1px solid var(--line); background: var(--panel); overflow: hidden; }
 #phChart { width: 100%; height: 100%; display: block; }
@@ -24,18 +26,24 @@
 .legend .temp { background: var(--amber); }
 .legend .limit { background: var(--red); }
 .legend .target { background: var(--cyan); opacity: .45; }
-.sensor-controls { display: flex; align-items: center; gap: 7px; }
-.sensor-controls select { font-size: 9px; max-width: 190px; }
-.sensor-grid { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 10px; align-items: center; }
-#radar { width: 230px; height: 230px; display: block; }
+.legend .phase { background: var(--muted-2); height: 10px; width: 2px; }
+
+.sensor-controls { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.sensor-controls select { font-size: 9px; max-width: 200px; }
+.array-chart-wrap { height: 150px; border: 1px solid var(--line); background: var(--panel-2); margin-bottom: 8px; }
+#arrayChart { width: 100%; height: 100%; display: block; }
+.array-grid { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 10px; align-items: start; }
+#radar { width: 236px; height: 236px; display: block; }
 .bars { display: grid; gap: 5px; min-width: 0; }
-.channel-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) 54px; gap: 6px; align-items: center; font-family: var(--mono); font-size: 8px; }
+.channel-row { display: grid; grid-template-columns: 70px minmax(0, 1fr) 58px; gap: 6px; align-items: center; font-family: var(--mono); font-size: 8px; }
 .channel-row .name { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .channel-row .track { height: 7px; background: var(--panel-2); border: 1px solid var(--line); position: relative; overflow: hidden; }
 .channel-row .fill { position: absolute; top: 0; bottom: 0; left: 50%; width: 0; background: var(--cyan); }
 .channel-row .fill.neg { background: var(--amber); }
+.channel-row .fill.dead { background: var(--line-strong); }
 .channel-row .val { text-align: right; color: var(--muted-2); white-space: nowrap; }
 .sensor-note { margin-top: 7px; padding-top: 6px; border-top: 1px dashed var(--line); font-size: 9px; color: var(--muted); }
+
 .verdict-panel { border-left-width: 3px; }
 .verdict-panel.good { border-left-color: var(--green); }
 .verdict-panel.warn { border-left-color: var(--amber); }
@@ -46,9 +54,10 @@
 .verdict-do { margin-top: 8px; padding-top: 7px; border-top: 1px solid var(--line); font-size: 10px; }
 .verdict-do b { font-family: var(--mono); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); display: block; margin-bottom: 2px; }
 .verdict-note { margin-top: 7px; font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
+
 .log-form input, .log-form select { width: 100%; }
 .log-list { display: grid; gap: 0; margin-top: 2px; }
-.log-row { display: grid; grid-template-columns: 42px 58px 58px minmax(110px, 1.3fr) minmax(110px, 1.3fr) 76px 70px 26px; gap: 6px; align-items: center; padding: 5px 4px; border-top: 1px solid var(--line); font-size: 10px; cursor: pointer; }
+.log-row { display: grid; grid-template-columns: 42px 54px 52px 58px minmax(100px, 1.2fr) minmax(100px, 1.2fr) 74px 72px 26px; gap: 6px; align-items: center; padding: 5px 4px; border-top: 1px solid var(--line); font-size: 10px; cursor: pointer; }
 .log-row:first-child { border-top: 0; }
 .log-row:hover { background: var(--panel-2); }
 .log-row.selected { background: var(--cyan-soft); }
@@ -59,6 +68,16 @@
 .log-row .del:hover { color: var(--red); background: var(--red-soft); }
 .log-empty { padding: 10px 2px; color: var(--muted); font-size: 10px; }
 .limits-panel ul { margin: 7px 0 0; padding-left: 16px; color: var(--muted); font-size: 9.5px; line-height: 1.55; }
+
+.disagree { display: grid; gap: 6px; }
+.d-row { border: 1px solid var(--line); border-left: 3px solid var(--line-strong); background: var(--panel); padding: 7px 8px; }
+.d-row.warn { border-left-color: var(--amber); background: var(--amber-soft); }
+.d-row.info { border-left-color: var(--cyan); background: var(--cyan-soft); }
+.d-row .d-label { font-size: 10.5px; font-weight: 600; }
+.d-row .d-body { font-size: 9.5px; color: var(--muted); line-height: 1.5; margin-top: 2px; }
+.d-row .d-do { font-size: 9.5px; margin-top: 3px; }
+.d-row .d-do b { font-family: var(--mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-2); display: block; }
+
 .rules { display: grid; gap: 5px; margin-top: 6px; }
 .rule { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); background: var(--panel); }
 .rule .sev { font-family: var(--mono); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
@@ -67,12 +86,48 @@
 .rule.info .sev { color: var(--cyan); }
 .rule .when { font-size: 10px; font-weight: 600; }
 .rule .then { font-size: 9.5px; color: var(--muted); }
-@media (max-width: 860px) {
+
+/* Batch facts */
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.fact { border: 1px solid var(--line); background: var(--panel-2); padding: 6px 7px; min-width: 0; }
+.fact .k { font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.fact .v { font-family: var(--mono); font-size: 14px; margin-top: 1px; font-variant-numeric: tabular-nums; }
+.fact .s { font-size: 8px; color: var(--muted-2); margin-top: 1px; }
+.fact.good .v { color: var(--cyan); }
+.fact.warn .v { color: var(--amber); }
+.fact.stop .v { color: var(--red); }
+
+/* Reference blank */
+.ref-block { border: 1px solid var(--line); background: var(--panel-2); padding: 8px; display: grid; gap: 6px; }
+.ref-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.ref-cell .k { font-family: var(--mono); font-size: 7px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted-2); }
+.ref-cell .v { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.ref-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+.ref-note { font-size: 9.5px; color: var(--muted); line-height: 1.5; }
+
+/* Phase history */
+.phase-table { width: 100%; border-collapse: collapse; font-size: 9.5px; }
+.phase-table th { text-align: left; font-family: var(--mono); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; font-weight: 400; color: var(--muted-2); padding: 0 4px 4px; border-bottom: 1px solid var(--line); }
+.phase-table td { padding: 4px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.phase-table td.num { text-align: right; font-family: var(--mono); }
+.phase-table .to { font-family: var(--mono); font-size: 8px; text-transform: uppercase; }
+.phase-table .empty { color: var(--muted); font-size: 10px; padding: 7px 4px; }
+
+/* Journal */
+.journal-list { display: grid; gap: 0; max-height: 240px; overflow: auto; }
+.journal-row { display: grid; grid-template-columns: 88px 74px minmax(0, 1fr); gap: 6px; padding: 4px 3px; border-top: 1px solid var(--line); font-size: 9.5px; }
+.journal-row:first-child { border-top: 0; }
+.journal-row .t { font-family: var(--mono); font-size: 8px; color: var(--muted-2); }
+.journal-row .kind { font-family: var(--mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.journal-row .body { color: var(--ink); line-height: 1.35; }
+.journal-empty { color: var(--muted); font-size: 10px; padding: 7px 3px; }
+
+@media (max-width: 900px) {
   .hero { flex-direction: column; }
   .hero-actions { justify-content: flex-start; }
-  .sensor-grid { grid-template-columns: 1fr; }
+  .array-grid { grid-template-columns: 1fr; }
   #radar { margin: 0 auto; }
-  .log-row { grid-template-columns: 36px 50px 50px 70px 58px 26px; }
+  .log-row { grid-template-columns: 36px 46px 46px 60px 52px 26px; }
   .log-row .smell, .log-row .visual { display: none; }
 }
 </style>
@@ -82,7 +137,7 @@
     <div class="hero-main">
       <div class="eyebrow">FERMENTATION LAB <span id="sourceBadge">NO DATA</span></div>
       <h1><span class="batch-name" id="heroBatch">Batch cockpit</span></h1>
-      <div class="hint">The log is the product. The array is one change detector inside it.</div>
+      <div class="hint">The log is the product. The array is one change detector inside it — and it is not a pH meter.</div>
       <div class="batch-setup">
         <label>Batch name <input id="fBatch" data-field="batch" placeholder="Sauerkraut #4" /></label>
         <label>Started <input id="fStarted" data-field="started" type="date" /></label>
@@ -96,6 +151,13 @@
           </select>
         </label>
         <label>Target pH <input id="fTarget" data-field="target" type="number" step="0.01" placeholder="3.8" /></label>
+        <label>Batch status
+          <select id="fStatus" data-field="status">
+            <option value="active">in progress</option>
+            <option value="completed">completed</option>
+            <option value="archived">archived</option>
+          </select>
+        </label>
       </div>
     </div>
     <div class="hero-actions">
@@ -103,11 +165,13 @@
       <button type="button" data-action="open-check">Check</button>
       <button type="button" data-action="open-datasets">Datasets</button>
       <button type="button" data-action="export-log">Export log</button>
+      <button type="button" id="exportJournal">Export journal</button>
     </div>
   </header>
 
   <div class="phase-strip">
     <span class="phase-pill" id="phasePill">NOT STARTED</span>
+    <span class="phase-pill" id="arrayPill">ARRAY —</span>
     <span class="phase-copy" id="phaseCopy">Add a reading to start the batch clock.</span>
     <span class="phase-score" id="protocolScore">0/7 primary controls</span>
   </div>
@@ -122,7 +186,9 @@
           <span><i class="temp"></i>temperature</span>
           <span><i class="limit"></i>4.6 low-acid stop</span>
           <span><i class="target"></i>your target</span>
+          <span><i class="phase"></i>array phase observation</span>
         </div>
+        <p class="hint" style="margin:6px 0 0">Ticks on the day axis are array-phase observations recorded by this workspace. They are a live-window estimate, not a lab measurement, and they never overrule pH or a visible fault.</p>
       </section>
 
       <section class="panel sensor-panel">
@@ -131,18 +197,50 @@
           <div class="sensor-controls">
             <select id="sourceSelect" aria-label="Sensor data source"></select>
             <span class="stamp" id="sensorStamp">no source</span>
+            <span class="stamp" id="liveRate">live —</span>
           </div>
         </div>
-        <div class="sensor-grid">
+        <div class="array-chart-wrap"><canvas id="arrayChart" width="700" height="150"></canvas></div>
+        <div class="array-grid">
           <svg id="radar" viewBox="0 0 240 240" role="img" aria-label="Response fingerprint"></svg>
           <div class="bars" id="channelBars"></div>
         </div>
         <div class="sensor-note" id="sensorNote">The array is a change detector. It cannot clear a batch, name a compound, or measure concentration.</div>
       </section>
 
+      <section class="panel">
+        <div class="panel-head"><h2>Reference blank</h2><span class="stamp" id="refStamp">none</span></div>
+        <div class="ref-block">
+          <div class="ref-grid">
+            <div class="ref-cell"><div class="k">Reference level</div><div class="v" id="refLevel">—</div></div>
+            <div class="ref-cell"><div class="k">Current level</div><div class="v" id="refCurrent">—</div></div>
+            <div class="ref-cell"><div class="k">Current − reference</div><div class="v" id="refDelta">—</div></div>
+            <div class="ref-cell"><div class="k">Channels match</div><div class="v" id="refChannels">—</div></div>
+          </div>
+          <div class="ref-actions">
+            <button type="button" id="setReference">Set reference from this window</button>
+            <button type="button" id="clearReference">Clear reference</button>
+          </div>
+          <div class="ref-note" id="refNote">A reference is a snapshot of this array's own response in a clean window. It is not a lab blank, not a concentration, and not comparable across arrays.</div>
+        </div>
+      </section>
+
       <section class="panel log-panel">
         <div class="panel-head"><h2>Batch log</h2><span class="stamp" id="logStamp"></span></div>
         <div id="logList" class="log-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Array phase history</h2><span class="stamp" id="phaseStamp">no observations</span></div>
+        <table class="phase-table">
+          <thead><tr><th>Time</th><th class="num">Day</th><th>Change</th><th class="num">Level</th><th class="num">Noise</th><th class="num">Rate</th></tr></thead>
+          <tbody id="phaseBody"><tr><td colspan="6" class="empty">Phase changes are recorded only after the same label holds for three windows, at least a minute apart.</td></tr></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Journal</h2><span class="stamp" id="journalStamp">0 events</span></div>
+        <div class="journal-list" id="journalList"><div class="journal-empty">No events yet. Phase changes, disagreements, and closed batches are written here and to the export.</div></div>
       </section>
     </main>
 
@@ -156,11 +254,22 @@
       </section>
 
       <section class="panel">
+        <div class="panel-head"><h2>Array vs primary controls</h2><span class="stamp" id="disagreeStamp">—</span></div>
+        <div class="disagree" id="disagree"><div class="hint">No disagreement yet. The array and the log have not both been read.</div></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Batch facts</h2><span class="stamp" id="factsStamp">—</span></div>
+        <div class="facts" id="facts"></div>
+      </section>
+
+      <section class="panel">
         <h2>Add reading</h2>
         <form id="logForm" class="log-form">
           <label>Day <input name="day" type="number" step="1" min="0" placeholder="3" /></label>
           <label>pH <input name="ph" type="number" step="0.01" min="0" max="14" placeholder="4.1" /></label>
           <label>Temp °C <input name="temp" type="number" step="0.1" placeholder="21" /></label>
+          <label>SG <input name="sg" type="number" step="0.001" placeholder="1.040" /></label>
           <label>Visible fault
             <select name="fault">
               <option value="none">none</option>
@@ -173,7 +282,7 @@
           <label>Action <select name="action"><option value="none">none</option><option value="verify pH">verify pH</option><option value="chill">chill</option><option value="discard">discard</option></select></label>
           <label class="wide">Smell note <input name="smell" placeholder="sour, cabbage, clean" /></label>
           <label class="wide">Visual note <input name="visual" placeholder="cloudy brine, no surface growth" /></label>
-          <div class="hint wide">The verdict uses the structured visible-fault choice, pH, temperature, ferment type, and target. Free-text notes are context, not keyword triggers.</div>
+          <div class="hint wide">SG is for beer, wine, mead, and kombucha; leave it blank for vegetable ferments. The verdict uses the structured visible-fault choice, pH, temperature, ferment type, and target. Free-text notes are context, not keyword triggers.</div>
           <button class="primary" type="button" id="logSubmit">Add reading</button>
         </form>
       </section>
@@ -185,6 +294,7 @@
           <li>It cannot identify a pathogen or a toxin. A pleasant smell is not a test.</li>
           <li>It cannot compare across arrays or rigs. The sensor panel is same-array only.</li>
           <li>It cannot measure concentration from a MOX response. The array sees a mixture.</li>
+          <li>The array phase is a shape estimate. A sealed ferment displaces oxygen with CO₂, which can flatten the array without the fermentation stopping.</li>
         </ul>
       </section>
     </aside>
@@ -200,20 +310,61 @@
 (function () {
   "use strict";
   var bridge = window.osmograph;
+  var host = window.__OSMOGRAPH_VIAL_HOST__;
   var data = null;
   var selectedLogId = null;
   var lastSentHeight = 0;
+  var lastPhase = "";
+  var lastArrayPhase = "";
+  var lastArrayPhaseAt = 0;
+  var pendingArrayPhase = "";
+  var pendingArrayPhaseCount = 0;
+  var journalEvents = [];
+  var phaseReady = false;
+  var arrayPhaseReady = false;
+  var reference = null;
+  var lastDisagreementSig = "";
+  var lastDisagreementAt = 0;
+  var closedLoggedFor = "";
   var SVG = "http://www.w3.org/2000/svg";
 
   var $ = function (sel) { return document.querySelector(sel); };
+  function finite(v) { return typeof v === "number" && isFinite(v); }
   function num(v) {
     if (v === null || v === undefined || v === "") return null;
     var n = Number(v);
-    return Number.isFinite(n) ? n : null;
+    return finite(n) ? n : null;
   }
   function fmt(v, digits) {
-    return (v === null || v === undefined || !Number.isFinite(Number(v))) ? "—" : Number(v).toFixed(digits);
+    return v === null || v === undefined || !isFinite(Number(v)) ? "—" : Number(v).toFixed(digits);
   }
+  function pct(v, digits) {
+    return finite(v) ? (v * 100).toFixed(digits === undefined ? 1 : digits) + "%" : "—";
+  }
+  function median(values) {
+    var f = values.filter(finite).sort(function (a, b) { return a - b; });
+    if (!f.length) return null;
+    var m = Math.floor(f.length / 2);
+    return f.length % 2 ? f[m] : (f[m - 1] + f[m]) / 2;
+  }
+  function lastFinite(list) {
+    if (!list) return null;
+    for (var i = list.length - 1; i >= 0; i--) if (finite(list[i])) return list[i];
+    return null;
+  }
+  function slopePerSecond(points) {
+    var n = points.length;
+    if (n < 2) return null;
+    var sx = 0, sy = 0, sxx = 0, sxy = 0;
+    for (var i = 0; i < n; i++) {
+      sx += points[i].t; sy += points[i].v;
+      sxx += points[i].t * points[i].t;
+      sxy += points[i].t * points[i].v;
+    }
+    var denom = n * sxx - sx * sx;
+    return denom ? (n * sxy - sx * sy) / denom : null;
+  }
+
   function sortedLogs() {
     if (!data || !data.domain || !data.domain.logs) return [];
     return data.domain.logs.slice().sort(function (a, b) {
@@ -224,8 +375,7 @@
   }
   function latestLog(logs) {
     for (var i = logs.length - 1; i >= 0; i--) {
-      var l = logs[i];
-      if (Object.keys(l.values || {}).length) return l;
+      if (Object.keys(logs[i].values || {}).length) return logs[i];
     }
     return null;
   }
@@ -247,7 +397,7 @@
   function dateDay(value) {
     if (!value) return null;
     var start = new Date(String(value) + "T00:00:00");
-    if (!Number.isFinite(start.getTime())) return null;
+    if (!finite(start.getTime())) return null;
     var now = new Date();
     var today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
     var then = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
@@ -260,9 +410,7 @@
     return started !== null ? Math.max(logged, started) : logged;
   }
   function hasLoggedDiscard(logs) {
-    return logs.some(function (l) {
-      return String(l.values.action || "").toLowerCase() === "discard";
-    });
+    return logs.some(function (l) { return String(l.values.action || "").toLowerCase() === "discard"; });
   }
   function latestFault(logs) {
     for (var i = logs.length - 1; i >= 0; i--) {
@@ -271,6 +419,20 @@
     }
     return "";
   }
+  function fieldValue(key) {
+    var f = data && data.domain && data.domain.fields ? data.domain.fields[key] : "";
+    return f === undefined || f === null ? "" : String(f);
+  }
+
+  // ---- Batch lifecycle: an open batch can be closed and reopened. ----
+  function batchStatus() {
+    var s = String(fieldValue("status") || "").toLowerCase();
+    if (s === "completed" || s === "archived") return s;
+    return "active";
+  }
+  function isClosed() { return batchStatus() !== "active"; }
+
+  // ---- Primary controls: the safety verdict. Never derived from the array. ----
   function primaryState(logs) {
     var fields = (data && data.domain && data.domain.fields) || {};
     var target = num(fields.target);
@@ -381,30 +543,7 @@
     }
     return null;
   }
-  function phaseInfo(logs) {
-    var fields = (data && data.domain && data.domain.fields) || {};
-    var target = num(fields.target);
-    var started = dateDay(fields.started);
-    if (!logs.length && started === null) {
-      return { label: "Not started", tone: "", copy: "Add a reading to start the batch clock.", score: protocolScore(logs) };
-    }
-    var primary = primaryState(logs);
-    if (primary) {
-      return { label: primary.label, tone: primary.tone, copy: primary.copy, score: protocolScore(logs) };
-    }
-    var day = currentDay(logs);
-    var ph = latestValue(logs, "ph");
-    if (ph !== null && target !== null && ph <= target) {
-      return { label: "At target", tone: "good", copy: "The logged pH is at or below your target. Hold the recipe; this is not a safety certificate.", score: protocolScore(logs) };
-    }
-    if (day <= 3) {
-      return { label: "Lag", tone: "", copy: "Early phase. Keep solids submerged and verify pH and temperature; quiet bubbles are not a safety signal.", score: protocolScore(logs) };
-    }
-    if (day >= 10) {
-      return { label: "Finish window", tone: "warn", copy: "The recipe window is closing. Check pH, temperature, and visible faults before packaging.", score: protocolScore(logs) };
-    }
-    return { label: "Active", tone: "good", copy: "Acidity is still moving toward the recipe target. Keep the log going.", score: protocolScore(logs) };
-  }
+
   function protocolScore(logs) {
     var fields = (data && data.domain && data.domain.fields) || {};
     var latest = latestLog(logs);
@@ -414,16 +553,44 @@
     if (String(fields.recipe || "").trim()) score++;
     if (String(fields.style || "").trim()) score++;
     if (num(fields.target) !== null) score++;
-    if (latest) {
-      if (latestValue(logs, "ph") !== null) score++;
-      if (latestValue(logs, "temp") !== null) score++;
-    }
+    if (latest && latestValue(logs, "ph") !== null) score++;
+    if (latest && latestValue(logs, "temp") !== null) score++;
     return score;
   }
+
+  function batchPhase(logs) {
+    var target = num((data && data.domain && data.domain.fields || {}).target);
+    var started = dateDay(fieldValue("started"));
+    if (!logs.length && started === null) {
+      return { label: "Not started", tone: "", copy: "Add a reading to start the batch clock.", score: protocolScore(logs) };
+    }
+    var primary = primaryState(logs);
+    if (primary && primary.tone === "stop") return { label: primary.label, tone: primary.tone, copy: primary.copy, score: protocolScore(logs) };
+    if (isClosed()) {
+      var closed = batchStatus();
+      return {
+        label: closed === "archived" ? "Archived" : "Completed",
+        tone: "",
+        copy: closed === "archived"
+          ? "This batch is archived. The recorded controls and journal are kept; new readings are blocked."
+          : "This batch is recorded as completed. The log is closed to new readings; the live array panel still shows the rig, but no phase observations are written to this batch.",
+        score: protocolScore(logs)
+      };
+    }
+    if (primary) return { label: primary.label, tone: primary.tone, copy: primary.copy, score: protocolScore(logs) };
+    var day = currentDay(logs);
+    var ph = latestValue(logs, "ph");
+    if (ph !== null && target !== null && ph <= target) {
+      return { label: "At target", tone: "good", copy: "The logged pH is at or below your target. Hold the recipe; this is not a safety certificate.", score: protocolScore(logs) };
+    }
+    if (day <= 3) return { label: "Lag", tone: "", copy: "Early phase. Keep solids submerged and verify pH and temperature; quiet bubbles are not a safety signal.", score: protocolScore(logs) };
+    if (day >= 10) return { label: "Finish window", tone: "warn", copy: "The recipe window is closing. Check pH, temperature, and visible faults before packaging.", score: protocolScore(logs) };
+    return { label: "Active", tone: "good", copy: "Acidity is still moving toward the recipe target. Keep the log going.", score: protocolScore(logs) };
+  }
+
   function verdictInfo(logs) {
-    var fields = (data && data.domain && data.domain.fields) || {};
-    var target = num(fields.target);
-    var started = dateDay(fields.started);
+    var target = num((data && data.domain && data.domain.fields || {}).target);
+    var started = dateDay(fieldValue("started"));
     if (!logs.length && started === null) {
       return {
         tone: "info", label: "Not started",
@@ -433,9 +600,18 @@
       };
     }
     var primary = primaryState(logs);
-    if (primary) {
-      return { tone: primary.tone, label: primary.label, body: primary.body, action: primary.action, note: primary.note };
+    if (primary && primary.tone === "stop") return { tone: primary.tone, label: primary.label, body: primary.body, action: primary.action, note: primary.note };
+    if (isClosed()) {
+      var closed = batchStatus();
+      return {
+        tone: "",
+        label: closed === "archived" ? "Archived" : "Batch completed",
+        body: "This batch is closed in the log. The recorded primary controls stay readable and the journal stays exportable. New readings are blocked; the live array panel is still shown for inspection but is not written to this batch.",
+        action: "Export the log, then set the status back to in progress only if you reopen this vessel.",
+        note: "A closed batch is a records state, not a safety certificate."
+      };
     }
+    if (primary) return { tone: primary.tone, label: primary.label, body: primary.body, action: primary.action, note: primary.note };
     var day = currentDay(logs);
     var ph = latestValue(logs, "ph");
     if (ph !== null && target !== null && ph <= target) {
@@ -446,35 +622,299 @@
     }
     return { tone: "info", label: "Active", body: "The logged pH is above your target. The sensor cannot stand in for pH; follow the tested recipe's boundary.", action: "Keep the temperature stable, keep solids submerged, and measure pH again on schedule.", note: "Not a safety certificate. The primary controls decide." };
   }
-  function setText(id, text) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = text;
+
+  // ---- The array model: the same-array change signal, judged against noise. ----
+  function arrayModel() {
+    var series = data ? data.series : null;
+    var snapshot = data ? data.snapshot : null;
+    var model = {
+      ready: false, reason: "", rows: [], level: null, noise: null,
+      change: null, ratePerMin: null, phase: null, confounded: false,
+      env: { temp: null, rh: null }, windowSec: 180, deadCount: 0
+    };
+    if (!series || !snapshot) { model.reason = "No host window."; return model; }
+    if (series.source !== "live") { model.reason = "Captured buffer, not a live batch."; return model; }
+    if (!series.response) { model.reason = "The profile transform has not been applied."; return model; }
+    var chans = snapshot.channels || [];
+    var limits = snapshot.channelLimits || {};
+    var response = series.response.values || [];
+    var liveRows = [];
+    var bands = [];
+    for (var i = 0; i < chans.length; i++) {
+      var id = chans[i].id || ("ch" + i);
+      var limit = limits[id];
+      var cv = limit && finite(limit.cv) ? Math.abs(limit.cv) : null;
+      var dead = !!(limit && limit.dead) || chans[i].health === "stuck" || chans[i].health === "saturated";
+      var band = cv === null ? null : Math.max(0.005, 2 * cv);
+      var row = response[i] || null;
+      var now = row ? lastFinite(row) : null;
+      model.rows.push({
+        index: i, id: id, label: chans[i].label || id, dead: dead,
+        band: band, response: now,
+        ratio: now !== null && band ? Math.abs(now) / band : null,
+        moved: !dead && now !== null && band !== null && Math.abs(now) >= band
+      });
+      if (!dead && band !== null && row) { liveRows.push(row); bands.push(band); }
+    }
+    model.deadCount = model.rows.filter(function (r) { return r.dead; }).length;
+    if (!liveRows.length) { model.reason = "No live channel with a noise band."; return model; }
+    model.noise = median(bands);
+    if (model.noise === null) model.noise = 0.01;
+
+    // Aggregate: the median response across live channels, per sample index.
+    var n = Math.max.apply(null, liveRows.map(function (r) { return r.length; }));
+    var times = series.time || [];
+    var all = [];
+    for (var k = 0; k < n; k++) {
+      var vals = [];
+      for (var r = 0; r < liveRows.length; r++) {
+        var v = liveRows[r][k];
+        if (finite(v)) vals.push(v);
+      }
+      if (vals.length) {
+        var t = times[k];
+        all.push({ t: finite(t) ? t : k, v: median(vals) });
+      }
+    }
+    if (all.length < 6) { model.reason = "Not enough live samples yet."; return model; }
+    var tLast = all[all.length - 1].t;
+    var window = all.filter(function (p) { return p.t >= tLast - 180; });
+    if (window.length < 6) window = all.slice(-12);
+    model.windowSec = Math.max(1, window[window.length - 1].t - window[0].t);
+    var first = window[0].v;
+    var last = window[window.length - 1].v;
+    model.level = last;
+    model.change = last - first;
+    var slope = slopePerSecond(window);
+    model.ratePerMin = slope === null ? null : slope * 60;
+    model.points = all.slice(-Math.min(all.length, 240));
+
+    var env = envDelta(model.windowSec);
+    model.env = env;
+    model.confounded = (env.temp !== null && Math.abs(env.temp) >= 2)
+      || (env.rh !== null && Math.abs(env.rh) >= 8);
+
+    if (snapshot.baseline && snapshot.baseline.state === "warming") {
+      model.phase = { key: "warming", label: "Baseline forming", tone: "warn", detail: "The profile will not call a change until the baseline is ready." };
+    } else if (snapshot.baseline && snapshot.baseline.state !== "ready") {
+      model.phase = { key: "idle", label: "No baseline", tone: "", detail: "The host has no reference for this array." };
+    } else if (model.confounded) {
+      model.phase = { key: "confounded", label: "Enclosure moved", tone: "warn", detail: "Temperature or humidity moved more than the threshold; the array phase is withheld." };
+    } else if (Math.abs(model.change) < model.noise) {
+      if (Math.abs(model.level) >= model.noise * 2) {
+        model.phase = { key: "stationary", label: "Stationary", tone: "live", detail: "The array is elevated but flat within its own noise for this window." };
+      } else {
+        model.phase = { key: "lag", label: "Lag", tone: "", detail: "No array movement beyond noise in this window." };
+      }
+    } else if (model.change > 0) {
+      var half = Math.max(4, Math.floor(window.length / 2));
+      var early = slopePerSecond(window.slice(0, half));
+      var late = slopePerSecond(window.slice(-half));
+      var slowing = early !== null && late !== null && early > 0 && late < early * 0.5;
+      model.phase = {
+        key: "active", label: slowing ? "Active, slowing" : "Active", tone: "live",
+        detail: slowing
+          ? "The response is still above noise but the rate has fallen by more than half — a possible approach to stationary."
+          : "The response rose beyond the array's own noise over this window."
+      };
+    } else {
+      model.phase = { key: "decline", label: "Decline", tone: "warn", detail: "The response fell beyond the array's own noise over this window." };
+    }
+    model.ready = true;
+    return model;
   }
+
+  function envDelta(windowSec) {
+    var cutoff = Date.now() - windowSec * 1000;
+    var rows = ((data && data.environment) || []).slice();
+    var recent = [];
+    if (host) {
+      try { recent = host.getRecentReadings(900) || []; } catch (e) { recent = []; }
+    }
+    var envRows = recent.filter(function (r) { return r && r.timestamp >= cutoff && r.env; });
+    var temps = envRows.map(function (r) { return num(r.env.temperature); }).filter(function (v) { return v !== null; });
+    var rhs = envRows.map(function (r) { return num(r.env.humidity); }).filter(function (v) { return v !== null; });
+    return {
+      temp: temps.length > 1 ? temps[temps.length - 1] - temps[0] : null,
+      rh: rhs.length > 1 ? rhs[rhs.length - 1] - rhs[0] : null
+    };
+  }
+
+  function trend(logs, key) {
+    var pts = logs.map(function (l) {
+      return { day: num(l.values.day), v: num(l.values[key]) };
+    }).filter(function (p) { return p.day !== null && p.v !== null; });
+    if (pts.length < 2) return null;
+    var first = pts[0], last = pts[pts.length - 1];
+    var dd = last.day - first.day;
+    if (dd <= 0) return null;
+    return { rate: (last.v - first.v) / dd, first: first, last: last, n: pts.length };
+  }
+
+  // ---- The disagreement engine: where the array and the controls disagree. ----
+  function disagreements(logs, model) {
+    var out = [];
+    var fields = (data && data.domain && data.domain.fields) || {};
+    var style = String(fields.style || "").toLowerCase();
+    var day = currentDay(logs);
+    var ph = trend(logs, "ph");
+    var sg = trend(logs, "sg");
+    var temp = trend(logs, "temp");
+    var latestPh = latestValue(logs, "ph");
+    var latestTemp = latestValue(logs, "temp");
+
+    if (model.rows.length && model.deadCount === model.rows.length) {
+      out.push({
+        tone: "warn", label: "The array is not measuring",
+        body: "Every channel is flagged dead or saturated. A flat array trace here is a sensor fault, not a finished ferment.",
+        action: "Check the rig and the sensor contact before reading the array panel."
+      });
+    }
+    if (model.confounded) {
+      var bits = [];
+      if (model.env.temp !== null) bits.push("temperature " + (model.env.temp > 0 ? "+" : "") + model.env.temp.toFixed(1) + " °C");
+      if (model.env.rh !== null) bits.push("humidity " + (model.env.rh > 0 ? "+" : "") + model.env.rh.toFixed(0) + " %RH");
+      out.push({
+        tone: "warn", label: "Enclosure moved during the window",
+        body: "The " + bits.join(" and ") + " changed more than the threshold. A MOX response is temperature- and humidity-sensitive, so the array phase is withheld.",
+        action: "Compare the array at a similar vessel temperature, or treat this window as uninformative."
+      });
+    }
+    if (model.ready && (model.phase.key === "stationary" || model.phase.key === "lag") && ph && ph.rate <= -0.05) {
+      out.push({
+        tone: "info", label: "Acidity still falling, array flat",
+        body: "The logged pH is still dropping by " + Math.abs(ph.rate).toFixed(2) + " per day while the array is flat. A sealed ferment displaces oxygen with CO₂, which can flatten a MOX response without the fermentation stopping.",
+        action: "Do not read a flat array as “finished”. Keep to the recipe's pH schedule and keep measuring."
+      });
+    }
+    if (model.ready && model.phase.key === "active" && ph && Math.abs(ph.rate) < 0.02 && day >= 2) {
+      out.push({
+        tone: "warn", label: "Array rising, pH flat",
+        body: "The array moved beyond noise but the logged pH has not changed by more than 0.02 per day. The array is not a pH meter; one of the two signals is misleading.",
+        action: "Verify the pH meter calibration and add a reading. Do not assume the batch is progressing because the array moved."
+      });
+    }
+    if (model.ready && model.phase.key === "lag" && day >= 3 && (latestTemp === null || (latestTemp >= 10 && latestTemp <= 30))) {
+      out.push({
+        tone: "warn", label: "No array movement by day " + day,
+        body: "The array stayed within noise after day 3. That can be a slow start, a cold vessel, a poor seal, or a sensor that is not seeing the headspace.",
+        action: "Verify the airlock and seal, confirm the temperature, then re-check pH. Do not assume the batch is safe or that it has failed."
+      });
+    }
+    if (model.ready && model.phase.key === "active" && sg && sg.rate > -0.001) {
+      out.push({
+        tone: "info", label: "Gravity flat while the array moves",
+        body: "Specific gravity is not falling (rate " + sg.rate.toFixed(4) + " per day) but the array moved. This is a disagreement, not a diagnosis.",
+        action: "Re-measure gravity and inspect the vessel; the two signals should be reconciled before packaging."
+      });
+    }
+    if (model.ready && model.phase.key === "decline" && style === "low-acid" && latestPh !== null && latestPh > 4.6) {
+      out.push({
+        tone: "warn", label: "Array falling, acidity above 4.6",
+        body: "The array moved down while the logged low-acid pH is still above 4.6. A falling array response is not evidence that the batch is safe.",
+        action: "The pH boundary decides. Follow the stop rule and the tested recipe."
+      });
+    }
+    if (model.ready && model.phase.key === "decline" && temp && temp.rate <= -0.5) {
+      out.push({
+        tone: "info", label: "Vessel cooling as the array falls",
+        body: "Temperature is falling by " + Math.abs(temp.rate).toFixed(1) + " °C per day. A cooler vessel slows fermentation and changes MOX sensitivity.",
+        action: "Hold the recipe's temperature range before drawing a conclusion from the array."
+      });
+    }
+    if (!model.ready && model.reason) {
+      out.push({
+        tone: "info", label: "Array unavailable",
+        body: model.reason + " The batch log still works; the array is optional context, not the verdict.",
+        action: "Choose a live source, or keep logging pH and temperature."
+      });
+    }
+    return out;
+  }
+
+  function setText(id, text) { var el = document.getElementById(id); if (el) el.textContent = text; }
   function svgEl(name, attrs, text) {
     var el = document.createElementNS(SVG, name);
     if (attrs) Object.keys(attrs).forEach(function (k) { el.setAttribute(k, String(attrs[k])); });
     if (text !== undefined) el.textContent = text;
     return el;
   }
-  function fieldValue(key) {
-    var f = data && data.domain && data.domain.fields ? data.domain.fields[key] : "";
-    return f === undefined || f === null ? "" : String(f);
-  }
+
   function renderFields() {
-    ["batch", "started", "recipe", "style", "target"].forEach(function (key) {
+    ["batch", "started", "recipe", "style", "target", "status"].forEach(function (key) {
       var input = document.querySelector('[data-field="' + key + '"]');
-      if (input && document.activeElement !== input) input.value = fieldValue(key);
+      if (input && document.activeElement !== input) input.value = fieldValue(key) || (key === "status" ? "active" : "");
     });
     setText("heroBatch", fieldValue("batch") || "Batch cockpit");
   }
-  function renderPhase(logs) {
-    var p = phaseInfo(logs);
+
+  function journablePhase(label) {
+    // Missing-field and range warnings are configuration states, not process
+    // phases. Journal the batch clock and the safety stops, not "Target not set".
+    return !/not set|missing|outside|unclassified/i.test(String(label));
+  }
+
+  function renderPhaseStrip(logs, model) {
+    var p = batchPhase(logs);
     var pill = $("#phasePill");
     pill.className = "phase-pill " + p.tone;
     pill.textContent = p.label;
     setText("phaseCopy", p.copy);
     setText("protocolScore", p.score + "/7 primary controls");
+    var arrayPill = $("#arrayPill");
+    if (model.ready && model.phase) {
+      arrayPill.className = "phase-pill " + model.phase.tone;
+      arrayPill.textContent = "ARRAY " + model.phase.label.toUpperCase();
+    } else {
+      arrayPill.className = "phase-pill";
+      arrayPill.textContent = "ARRAY —";
+    }
+    if (!phaseReady) {
+      lastPhase = p.label;
+      phaseReady = true;
+    } else if (p.label !== lastPhase) {
+      var previous = lastPhase;
+      lastPhase = p.label;
+      if (logs.length && journablePhase(p.label) && host && host.capabilities.logEvents) {
+        host.logEvent("phase", "Batch phase changed: " + previous + " → " + p.label, {
+          previous: previous, phase: p.label, protocolScore: p.score
+        }).catch(function () {});
+      }
+    }
+    if (!arrayPhaseReady) {
+      lastArrayPhase = model.ready && model.phase ? model.phase.label : "";
+      arrayPhaseReady = true;
+    } else if (model.ready && model.phase && model.phase.label !== lastArrayPhase) {
+      // A phase that flickers with noise is not an observation. Require the
+      // same new label on three consecutive windows before recording it, and
+      // never more than once a minute.
+      if (model.phase.label === pendingArrayPhase) pendingArrayPhaseCount++;
+      else { pendingArrayPhase = model.phase.label; pendingArrayPhaseCount = 1; }
+      if (pendingArrayPhaseCount >= 3 && logs.length && !isClosed() && Date.now() - lastArrayPhaseAt >= 60000) {
+        var prev = lastArrayPhase;
+        lastArrayPhase = model.phase.label;
+        lastArrayPhaseAt = Date.now();
+        pendingArrayPhase = "";
+        pendingArrayPhaseCount = 0;
+        if (host && host.capabilities.logEvents) {
+          host.logEvent("array-phase", "Array phase: " + (prev || "—") + " → " + model.phase.label, {
+            previous: prev,
+            phase: model.phase.label,
+            phaseKey: model.phase.key,
+            day: currentDay(logs),
+            index: model.level,
+            change: model.change,
+            noise: model.noise,
+            ratePerMin: model.ratePerMin,
+            temp: model.env.temp,
+            rh: model.env.rh,
+            windowSec: model.windowSec
+          }).catch(function () {});
+        }
+      }
+    }
   }
+
   function renderVerdict(logs) {
     var v = verdictInfo(logs);
     var panel = $("#verdictPanel");
@@ -484,10 +924,308 @@
     setText("verdictDo", v.action);
     setText("verdictNote", v.note);
   }
+
+  function renderFacts(logs, model) {
+    var fields = (data && data.domain && data.domain.fields) || {};
+    var target = num(fields.target);
+    var day = currentDay(logs);
+    var started = dateDay(fieldValue("started"));
+    var ph = latestValue(logs, "ph");
+    var temp = latestValue(logs, "temp");
+    var sg = latestValue(logs, "sg");
+    var sgTrend = trend(logs, "sg");
+    var facts = [];
+    facts.push({
+      k: "Batch day",
+      v: logs.length || started !== null ? String(day) : "—",
+      s: started !== null ? "from the start date" : logs.length ? "newest logged day" : "no readings"
+    });
+    facts.push({
+      k: "pH",
+      v: ph === null ? "—" : fmt(ph, 2),
+      s: target === null ? "no target set" : ph === null ? "target " + fmt(target, 2) : ph <= target ? "at or below target " + fmt(target, 2) : "above target " + fmt(target, 2),
+      tone: ph === null || target === null ? "" : ph <= target ? "good" : "warn"
+    });
+    facts.push({
+      k: "Temperature",
+      v: temp === null ? "—" : fmt(temp, 1) + " °C",
+      s: temp === null ? "no reading" : temp < 10 || temp > 30 ? "outside the common 10–30 °C" : "inside the common range",
+      tone: temp === null ? "" : temp < 10 || temp > 30 ? "warn" : "good"
+    });
+    facts.push({
+      k: "Specific gravity",
+      v: sg === null ? "—" : fmt(sg, 3),
+      s: sg === null ? "not logged" : sgTrend === null ? "one reading" : (sgTrend.rate >= 0 ? "+" : "") + sgTrend.rate.toFixed(4) + " / day, " + sgTrend.n + " points",
+      tone: sg === null || sgTrend === null ? "" : sgTrend.rate < -0.001 ? "good" : "warn"
+    });
+    facts.push({
+      k: "Array phase",
+      v: model.ready ? model.phase.label : "—",
+      s: model.ready ? "same-array estimate" : model.reason || "no live window"
+    });
+    facts.push({
+      k: "Array noise",
+      v: model.noise === null || model.noise === undefined ? "—" : pct(model.noise, 2),
+      s: "median 2×CV band"
+    });
+    var hostEl = $("#facts");
+    hostEl.textContent = "";
+    facts.forEach(function (f) {
+      var el = document.createElement("div");
+      el.className = "fact" + (f.tone ? " " + f.tone : "");
+      var k = document.createElement("div");
+      k.className = "k";
+      k.textContent = f.k;
+      var v = document.createElement("div");
+      v.className = "v";
+      v.textContent = f.v;
+      var s = document.createElement("div");
+      s.className = "s";
+      s.textContent = f.s;
+      el.appendChild(k); el.appendChild(v); el.appendChild(s);
+      hostEl.appendChild(el);
+    });
+    setText("factsStamp", logs.length || started !== null ? "day " + day : "no batch clock");
+  }
+
+  function liveChannelIds(model) {
+    return model.rows.filter(function (r) { return !r.dead; }).map(function (r) { return r.id; }).sort();
+  }
+
+  function renderReference(model) {
+    var ready = model.ready === true;
+    var channelsNow = ready ? liveChannelIds(model) : [];
+    var channelsRef = reference && Array.isArray(reference.channels) ? reference.channels.slice().sort() : null;
+    var match = channelsRef && ready ? channelsRef.join("|") === channelsNow.join("|") : null;
+    setText("refStamp", reference ? "set " + new Date(reference.at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "none");
+    setText("refLevel", reference ? pct(reference.level, 2) : "—");
+    setText("refCurrent", ready ? pct(model.level, 2) : "—");
+    var deltaEl = $("#refDelta");
+    if (reference && ready && match === false) {
+      deltaEl.textContent = "refused";
+    } else if (reference && ready && !model.confounded) {
+      var d = model.level - reference.level;
+      deltaEl.textContent = (d >= 0 ? "+" : "") + pct(d, 2);
+    } else if (reference && ready) {
+      deltaEl.textContent = "withheld";
+    } else {
+      deltaEl.textContent = "—";
+    }
+    setText("refChannels", channelsRef ? (ready ? (match ? "yes (" + channelsNow.length + ")" : "no") : "not live") : "—");
+    var note = $("#refNote");
+    if (!reference) {
+      note.textContent = "A reference is a snapshot of this array's own response in a clean window. It is not a lab blank, not a concentration, and not comparable across arrays.";
+    } else if (!ready) {
+      note.textContent = "A reference is stored, but there is no live window to compare it with. The batch log still works.";
+    } else if (match === false) {
+      note.textContent = "The stored reference was taken on a different channel set (" + channelsRef.join(", ") + "). The comparison is refused rather than scaled.";
+    } else if (model.confounded) {
+      note.textContent = "Temperature or humidity moved in this window, so the reference comparison is withheld. Re-take the window in a steady enclosure.";
+    } else {
+      note.textContent = "Compared on the same channels at the same host baseline. A difference is a change on this array; it is not a concentration and it cannot clear or fail a batch.";
+    }
+  }
+
+  function renderPhaseHistory() {
+    var body = $("#phaseBody");
+    body.textContent = "";
+    var rows = journalEvents.filter(function (e) {
+      return e && e.type === "array-phase" && e.data;
+    }).slice(-12).reverse();
+    setText("phaseStamp", rows.length ? rows.length + " observation" + (rows.length === 1 ? "" : "s") : "no observations");
+    if (!rows.length) {
+      var tr = document.createElement("tr");
+      var td = document.createElement("td");
+      td.colSpan = 6;
+      td.className = "empty";
+      td.textContent = "Phase changes are recorded only after the same label holds for three windows, at least a minute apart.";
+      tr.appendChild(td);
+      body.appendChild(tr);
+      return;
+    }
+    rows.forEach(function (event) {
+      var d = event.data;
+      var tr = document.createElement("tr");
+      var t = document.createElement("td");
+      t.textContent = new Date(event.timestamp || Date.now()).toLocaleDateString([], { month: "short", day: "numeric" }) + " " + new Date(event.timestamp || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      var day = document.createElement("td");
+      day.className = "num";
+      day.textContent = num(d.day) === null ? "—" : String(d.day);
+      var change = document.createElement("td");
+      change.className = "to";
+      change.textContent = String(d.previous || "—") + " → " + String(d.phase || "—");
+      var level = document.createElement("td");
+      level.className = "num";
+      level.textContent = pct(num(d.index), 2);
+      var noise = document.createElement("td");
+      noise.className = "num";
+      noise.textContent = pct(num(d.noise), 2);
+      var rate = document.createElement("td");
+      rate.className = "num";
+      rate.textContent = num(d.ratePerMin) === null ? "—" : num(d.ratePerMin).toFixed(3);
+      tr.appendChild(t); tr.appendChild(day); tr.appendChild(change); tr.appendChild(level); tr.appendChild(noise); tr.appendChild(rate);
+      body.appendChild(tr);
+    });
+  }
+
+  function renderJournal() {
+    var list = $("#journalList");
+    var rows = journalEvents.slice(-40).reverse();
+    setText("journalStamp", journalEvents.length + (journalEvents.length === 1 ? " event" : " events"));
+    list.textContent = "";
+    if (!rows.length) {
+      var empty = document.createElement("div");
+      empty.className = "journal-empty";
+      empty.textContent = "No events yet. Phase changes, disagreements, and closed batches are written here and to the export.";
+      list.appendChild(empty);
+      return;
+    }
+    rows.forEach(function (event) {
+      var when = new Date(event.timestamp || Date.now());
+      var row = document.createElement("div");
+      row.className = "journal-row";
+      var t = document.createElement("span");
+      t.className = "t";
+      t.textContent = when.toLocaleDateString([], { month: "short", day: "numeric" }) + " " + when.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      var kind = document.createElement("span");
+      kind.className = "kind";
+      kind.textContent = String(event.type || "note");
+      var body = document.createElement("span");
+      body.className = "body";
+      body.textContent = event.message || "";
+      row.appendChild(t); row.appendChild(kind); row.appendChild(body);
+      list.appendChild(row);
+    });
+  }
+
+  // Logs a disagreement only when the set of findings changes, so a live
+  // window does not write the same note on every frame.
+  function noteDisagreements(logs, model) {
+    if (!host || !host.capabilities.logEvents || !logs.length || !model.ready) return;
+    var findings = disagreements(logs, model).filter(function (d) {
+      return d.label !== "Array unavailable";
+    });
+    if (isClosed()) return;
+    var sig = findings.map(function (d) { return d.label; }).join(" | ");
+    if (!sig) { lastDisagreementSig = ""; return; }
+    if (sig === lastDisagreementSig) return;
+    if (Date.now() - lastDisagreementAt < 120000) return;
+    lastDisagreementSig = sig;
+    lastDisagreementAt = Date.now();
+    host.logEvent("disagreement", findings.map(function (d) { return d.label; }).join("; "), {
+      findings: findings.map(function (d) { return { label: d.label, tone: d.tone }; }),
+      day: currentDay(logs),
+      phase: model.phase ? model.phase.label : "",
+      level: model.level,
+      noise: model.noise
+    }).catch(function () {});
+  }
+
+  function renderDisagreements(logs, model) {
+    var list = disagreements(logs, model);
+    var hostEl = $("#disagree");
+    hostEl.textContent = "";
+    setText("disagreeStamp", list.length ? list.length + " note" + (list.length === 1 ? "" : "s") : "—");
+    if (!list.length) {
+      var empty = document.createElement("div");
+      empty.className = "hint";
+      empty.textContent = model.ready
+        ? "No disagreement in this window. Keep logging the primary controls."
+        : "No disagreement yet. The array and the log have not both been read.";
+      hostEl.appendChild(empty);
+      return;
+    }
+    list.forEach(function (d) {
+      var row = document.createElement("div");
+      row.className = "d-row " + d.tone;
+      var label = document.createElement("div");
+      label.className = "d-label";
+      label.textContent = d.label;
+      var body = document.createElement("div");
+      body.className = "d-body";
+      body.textContent = d.body;
+      var doEl = document.createElement("div");
+      doEl.className = "d-do";
+      var b = document.createElement("b");
+      b.textContent = "Do this";
+      var span = document.createElement("span");
+      span.textContent = d.action;
+      doEl.appendChild(b); doEl.appendChild(span);
+      row.appendChild(label); row.appendChild(body); row.appendChild(doEl);
+      hostEl.appendChild(row);
+    });
+  }
+
+  function renderLiveTick(reading) {
+    if (!host) return;
+    var channels = reading && reading.channels ? reading.channels : [];
+    var finiteVals = channels.filter(finite);
+    if (!finiteVals.length) { setText("liveRate", "live —"); return; }
+    var readings = [];
+    try { readings = host.getRecentReadings(200); } catch (e) { readings = []; }
+    var rate = host.computeRateOfChange(readings, 0, 30000);
+    setText("liveRate", "ch0 " + finiteVals[0].toFixed(0) + " · " + (finite(rate) ? rate.toFixed(2) : "—") + "/s");
+  }
+
+  function captureReference() {
+    if (!host) return;
+    if (isClosed()) {
+      bridge.toast("This batch is closed. Set the status back to in progress to take a reference.");
+      return;
+    }
+    var model = arrayModel();
+    if (!model.ready) {
+      bridge.toast("No live array window to take a reference from.");
+      return;
+    }
+    if (model.confounded) {
+      bridge.toast("Temperature or humidity moved in this window; the reference was not saved.");
+      return;
+    }
+    reference = {
+      at: Date.now(),
+      level: model.level,
+      change: model.change,
+      noise: model.noise,
+      phase: model.phase ? model.phase.label : "",
+      channels: liveChannelIds(model)
+    };
+    if (host.capabilities.persist) host.persist("reference", reference).catch(function () {});
+    if (host.capabilities.logEvents) {
+      host.logEvent("reference", "Reference set from this array window.", {
+        level: reference.level,
+        change: reference.change,
+        noise: reference.noise,
+        phase: reference.phase,
+        channels: reference.channels
+      }).catch(function () {});
+    }
+    renderAll();
+  }
+
+  function clearReference() {
+    reference = null;
+    if (host && host.capabilities.persist) host.persist("reference", null).catch(function () {});
+    if (host && host.capabilities.logEvents) host.logEvent("reference", "Reference cleared.", {}).catch(function () {});
+    renderAll();
+  }
+
+  function arrayPhaseMarkers() {
+    var markers = [];
+    journalEvents.forEach(function (event) {
+      if (event.type !== "array-phase" || !event.data) return;
+      var day = num(event.data.day);
+      if (day === null) return;
+      if (day < 0 || day > 400) return;
+      markers.push({ day: day, label: String(event.data.phase || "array"), at: event.timestamp });
+    });
+    return markers.slice(-24);
+  }
+
   function renderChart(logs) {
     var svg = $("#phChart");
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    var W = 760, H = 260, L = 44, R = 46, T = 16, B = 28;
+    var W = 760, H = 260, L = 44, R = 46, T = 16, B = 30;
     var plotW = W - L - R, plotH = H - T - B;
     var phPoints = logs.filter(function (l) { return num(l.values.ph) !== null; });
     var tempPoints = logs.filter(function (l) { return num(l.values.temp) !== null; });
@@ -520,12 +1258,24 @@
     var yLimit = yPh(4.6);
     svg.appendChild(svgEl("line", { x1: L, y1: yLimit, x2: W - R, y2: yLimit, stroke: lowAcid ? "#b91c1c" : "#b9ab95", "stroke-width": 1.2, "stroke-dasharray": "4 4", opacity: lowAcid ? .75 : .28 }));
     svg.appendChild(svgEl("text", { x: W - R - 3, y: yLimit - 4, "text-anchor": "end", fill: lowAcid ? "#b91c1c" : "#8a7f6c", "font-size": 8, "font-family": "monospace" }, lowAcid ? "4.6 low-acid stop" : "4.6 (low-acid only)"));
-    var target = num(data.domain.fields.target);
+
+    var target = num((data.domain.fields || {}).target);
     if (target !== null && target >= phMin && target <= phMax) {
       var yTarget = yPh(target);
       svg.appendChild(svgEl("line", { x1: L, y1: yTarget, x2: W - R, y2: yTarget, stroke: "#0e7490", "stroke-width": 1, "stroke-dasharray": "3 5", opacity: .55 }));
       svg.appendChild(svgEl("text", { x: L + 4, y: yTarget - 4, fill: "#0e7490", "font-size": 8, "font-family": "monospace" }, "target " + target.toFixed(1)));
     }
+
+    // Array-phase observations recorded live, pinned to their batch day.
+    var markers = arrayPhaseMarkers();
+    var markerTone = { "lag": "#8a7f6c", "active": "#0e7490", "active, slowing": "#0e7490", "stationary": "#0e7490", "decline": "#b45309", "confounded": "#b45309", "warming": "#b45309" };
+    markers.forEach(function (m) {
+      var mx = x(m.day);
+      var color = markerTone[String(m.label).toLowerCase()] || "#8a7f6c";
+      svg.appendChild(svgEl("line", { x1: mx, y1: T, x2: mx, y2: T + plotH, stroke: color, "stroke-width": 1, "stroke-dasharray": "2 4", opacity: .45 }));
+      var label = svgEl("text", { x: mx + 2, y: T + 9, fill: color, "font-size": 7, "font-family": "monospace" }, String(m.label).slice(0, 10));
+      svg.appendChild(label);
+    });
 
     function path(points, yFn, stroke, dash) {
       if (!points.length) return;
@@ -552,23 +1302,68 @@
     path(phPoints, Object.assign(function (v) { return yPh(v); }, { key: "ph" }), "#0e7490", null);
     path(tempPoints, Object.assign(function (v) { return yTemp(v); }, { key: "temp" }), "#b45309", "5 3");
   }
-  function changeFromWindow(series) {
-    if (!series || !series.values || !series.values.length) return [];
-    var out = [];
-    series.channels.forEach(function (name, ci) {
-      var channel = series.values[ci] || [];
-      var finite = channel.filter(function (v) { return v !== null && Number.isFinite(v); });
-      if (finite.length < 8) { out.push({ name: name, change: null }); return; }
-      var n = Math.max(3, Math.floor(finite.length * 0.12));
-      var first = finite.slice(0, n).reduce(function (a, b) { return a + b; }, 0) / n;
-      var lastArr = finite.slice(-n);
-      var last = lastArr.reduce(function (a, b) { return a + b; }, 0) / lastArr.length;
-      var change = first > 0 ? (last - first) / first : null;
-      out.push({ name: name, change: change });
-    });
-    return out;
+
+  function drawArrayChart(model) {
+    var canvas = $("#arrayChart");
+    if (!canvas) return;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    var w = Math.max(300, Math.round(rect.width || 700));
+    var h = 150;
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    if (!model || !model.points || !model.points.length) {
+      ctx.fillStyle = "#8a7f6c";
+      ctx.font = "9px ui-monospace, monospace";
+      ctx.fillText("No live response window.", 8, h / 2);
+      return;
+    }
+    var pts = model.points;
+    var padL = 46, padR = 10, padT = 10, padB = 18;
+    var vs = pts.map(function (p) { return p.v; });
+    var lo = Math.min.apply(null, vs.concat([0]));
+    var hi = Math.max.apply(null, vs.concat([0]));
+    if (model.noise) { lo = Math.min(lo, -model.noise); hi = Math.max(hi, model.noise); }
+    if (hi - lo < 1e-9) { hi = lo + 0.01; }
+    var pad = (hi - lo) * 0.1;
+    lo -= pad; hi += pad;
+    var t0 = pts[0].t, t1 = pts[pts.length - 1].t;
+    var tSpan = Math.max(1e-6, t1 - t0);
+    function x(t) { return padL + (t - t0) / tSpan * (w - padL - padR); }
+    function y(v) { return padT + (1 - (v - lo) / (hi - lo)) * (h - padT - padB); }
+    if (model.noise) {
+      ctx.fillStyle = "rgba(138,127,108,.16)";
+      var yTop = y(Math.min(hi, model.noise));
+      var yBot = y(Math.max(lo, -model.noise));
+      ctx.fillRect(padL, yTop, w - padL - padR, Math.max(0, yBot - yTop));
+    }
+    ctx.strokeStyle = "rgba(29,26,22,.10)";
+    for (var g = 0; g <= 2; g++) {
+      var gy = padT + (g / 2) * (h - padT - padB);
+      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(w - padR, gy); ctx.stroke();
+      ctx.fillStyle = "#8a7f6c"; ctx.font = "8px ui-monospace, monospace";
+      ctx.fillText(pct(hi - (g / 2) * (hi - lo), 1), 3, gy + 3);
+    }
+    ctx.strokeStyle = "rgba(29,26,22,.35)";
+    ctx.beginPath(); ctx.moveTo(padL, y(0)); ctx.lineTo(w - padR, y(0)); ctx.stroke();
+    ctx.strokeStyle = "#0e7490";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    pts.forEach(function (p, i) { if (i === 0) ctx.moveTo(x(p.t), y(p.v)); else ctx.lineTo(x(p.t), y(p.v)); });
+    ctx.stroke();
+    var last = pts[pts.length - 1];
+    ctx.fillStyle = "#0e7490";
+    ctx.beginPath(); ctx.arc(x(last.t), y(last.v), 2.6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#8a7f6c"; ctx.font = "8px ui-monospace, monospace";
+    ctx.fillText("−" + Math.round(tSpan) + " s", padL, h - 5);
+    ctx.fillText("now", w - padR - 18, h - 5);
   }
-  function renderSensor() {
+
+  function renderArray(model) {
     var select = $("#sourceSelect");
     var sources = (data && data.sources) || [];
     var current = data ? data.selectedSource : "";
@@ -584,89 +1379,102 @@
       });
     }
     if (current) select.value = current;
-    var series = data ? data.series : null;
+
+    drawArrayChart(model);
     var radar = $("#radar");
     while (radar.firstChild) radar.removeChild(radar.firstChild);
     var bars = $("#channelBars");
     bars.textContent = "";
-    if (!series || !series.channels || !series.channels.length) {
-      radar.appendChild(svgEl("text", { x: 120, y: 116, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 10 }, "No sensor window."));
-      radar.appendChild(svgEl("text", { x: 120, y: 132, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 9 }, "Choose Live or a recording."));
-      var empty = document.createElement("div");
-      empty.className = "hint";
-      empty.textContent = "The batch log still works without a sensor. The array is optional context, not the verdict.";
-      bars.appendChild(empty);
-      setText("sensorStamp", "no source");
-      setText("sensorNote", "The array is a change detector. It cannot clear a batch, name a compound, or measure concentration.");
-      return;
-    }
-    var values = series.fingerprint || [];
-    var finite = values.filter(function (v) { return v !== null && Number.isFinite(v); });
-    var maxAbs = finite.reduce(function (m, v) { return Math.max(m, Math.abs(v)); }, 1e-9);
-    var cx = 120, cy = 120, r = 82;
-    for (var ring = 1; ring <= 4; ring++) {
-      var rr = (ring / 4) * r;
-      var d = "";
-      for (var i = 0; i <= values.length; i++) {
-        var a = (i / Math.max(1, values.length)) * Math.PI * 2 - Math.PI / 2;
-        d += (i ? "L" : "M") + (cx + Math.cos(a) * rr).toFixed(1) + " " + (cy + Math.sin(a) * rr).toFixed(1) + " ";
+
+    var series = data ? data.series : null;
+    var fingerprint = series ? series.fingerprint : null;
+    var values = (fingerprint || []).filter(finite);
+    if (!values.length) {
+      radar.appendChild(svgEl("text", { x: 120, y: 118, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 10 }, "No fingerprint."));
+      radar.appendChild(svgEl("text", { x: 120, y: 134, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 9 }, "Choose Live or a recording."));
+    } else {
+      var maxAbs = values.reduce(function (m, v) { return Math.max(m, Math.abs(v)); }, 1e-9);
+      var cx = 120, cy = 120, r = 82;
+      for (var ring = 1; ring <= 4; ring++) {
+        var rr = (ring / 4) * r;
+        var d = "";
+        for (var i = 0; i <= values.length; i++) {
+          var a = (i / Math.max(1, values.length)) * Math.PI * 2 - Math.PI / 2;
+          d += (i ? "L" : "M") + (cx + Math.cos(a) * rr).toFixed(1) + " " + (cy + Math.sin(a) * rr).toFixed(1) + " ";
+        }
+        radar.appendChild(svgEl("path", { d: d, fill: "none", stroke: ring === 4 ? "#b9ab95" : "#e6dccd", "stroke-width": 1 }));
       }
-      radar.appendChild(svgEl("path", { d: d, fill: "none", stroke: ring === 4 ? "#b9ab95" : "#e6dccd", "stroke-width": 1 }));
-    }
-    if (finite.length) {
       var pts = [];
-      values.forEach(function (v, i) {
-        var a = (i / Math.max(1, values.length)) * Math.PI * 2 - Math.PI / 2;
-        var rr = v !== null && Number.isFinite(v) ? (Math.abs(v) / maxAbs) * r : 0;
+      fingerprint.forEach(function (v, i) {
+        var a = (i / Math.max(1, fingerprint.length)) * Math.PI * 2 - Math.PI / 2;
+        var rr = finite(v) ? (Math.abs(v) / maxAbs) * r : 0;
         pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
-        var dot = svgEl("circle", { cx: pts[i][0].toFixed(1), cy: pts[i][1].toFixed(1), r: 2.4, fill: v >= 0 ? "#0e7490" : "#b45309" });
-        dot.appendChild(svgEl("title", {}, series.channels[i] + " · " + (v === null ? "no value" : (v * 100).toFixed(1) + "%")));
+        var dot = svgEl("circle", { cx: pts[i][0].toFixed(1), cy: pts[i][1].toFixed(1), r: 2.4, fill: finite(v) && v >= 0 ? "#0e7490" : "#b45309" });
+        dot.appendChild(svgEl("title", {}, (series.channels[i] || "") + " · " + (finite(v) ? (v * 100).toFixed(1) + "%" : "no value")));
         radar.appendChild(dot);
       });
       var poly = pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" ");
       radar.appendChild(svgEl("polygon", { points: poly, fill: "rgba(14,116,144,.10)", stroke: "#0e7490", "stroke-width": 1.5 }));
-      values.forEach(function (v, i) {
-        var a = (i / Math.max(1, values.length)) * Math.PI * 2 - Math.PI / 2;
-        var label = svgEl("text", { x: (cx + Math.cos(a) * (r + 13)).toFixed(1), y: (cy + Math.sin(a) * (r + 13) + 3).toFixed(1), "text-anchor": "middle", fill: "#8a7f6c", "font-size": 7, "font-family": "monospace" }, String(series.channels[i] || "").slice(0, 8));
-        radar.appendChild(label);
+      fingerprint.forEach(function (v, i) {
+        var a = (i / Math.max(1, fingerprint.length)) * Math.PI * 2 - Math.PI / 2;
+        radar.appendChild(svgEl("text", { x: (cx + Math.cos(a) * (r + 13)).toFixed(1), y: (cy + Math.sin(a) * (r + 13) + 3).toFixed(1), "text-anchor": "middle", fill: "#8a7f6c", "font-size": 7, "font-family": "monospace" }, String(series.channels[i] || "").slice(0, 8)));
       });
-    } else {
-      radar.appendChild(svgEl("text", { x: 120, y: 120, "text-anchor": "middle", fill: "#8a7f6c", "font-size": 10 }, "No finite fingerprint."));
     }
-    var changes = changeFromWindow(series);
-    var maxChange = changes.reduce(function (m, c) { return Math.max(m, Math.abs(c.change || 0)); }, 1e-9);
-    changes.forEach(function (c) {
-      var row = document.createElement("div");
-      row.className = "channel-row";
-      var name = document.createElement("span");
-      name.className = "name";
-      name.textContent = c.name;
-      var track = document.createElement("span");
-      track.className = "track";
-      var fill = document.createElement("span");
-      fill.className = "fill" + (c.change !== null && c.change < 0 ? " neg" : "");
-      var pct = c.change === null ? 0 : Math.min(1, Math.abs(c.change) / maxChange) * 50;
-      fill.style.width = pct + "%";
-      fill.style.left = c.change !== null && c.change < 0 ? (50 - pct) + "%" : "50%";
-      track.appendChild(fill);
-      var val = document.createElement("span");
-      val.className = "val";
-      val.textContent = c.change === null ? "—" : (c.change * 100).toFixed(1) + "%";
-      row.appendChild(name); row.appendChild(track); row.appendChild(val);
-      bars.appendChild(row);
-    });
-    setText("sensorStamp", series.channels.length + " ch · " + String(series.label || "").slice(0, 28));
-    setText("sensorNote", "Descriptive change from the opening window. It is not the detector's internal score, not concentration, and not a safety verdict.");
+
+    if (!model || !model.rows.length) {
+      var empty = document.createElement("div");
+      empty.className = "hint";
+      empty.textContent = "The batch log still works without a sensor. The array is optional context, not the verdict.";
+      bars.appendChild(empty);
+    } else {
+      model.rows.forEach(function (row) {
+        var el = document.createElement("div");
+        el.className = "channel-row";
+        var name = document.createElement("span");
+        name.className = "name";
+        name.textContent = row.label;
+        var track = document.createElement("span");
+        track.className = "track";
+        var fill = document.createElement("span");
+        fill.className = "fill" + (row.dead ? " dead" : row.response !== null && row.response < 0 ? " neg" : "");
+        var scale = row.band ? Math.min(1, Math.abs(row.response || 0) / (row.band * 3)) : 0;
+        var width = (scale * 50);
+        fill.style.width = width + "%";
+        fill.style.left = row.response !== null && row.response < 0 ? (50 - width) + "%" : "50%";
+        track.appendChild(fill);
+        var val = document.createElement("span");
+        val.className = "val";
+        val.textContent = row.dead ? "dead" : pct(row.response) + (row.ratio !== null ? " · " + row.ratio.toFixed(1) + "×" : "");
+        el.appendChild(name); el.appendChild(track); el.appendChild(val);
+        bars.appendChild(el);
+      });
+    }
+
+    var summary = [];
+    if (model.ready) {
+      summary.push("phase " + model.phase.label);
+      summary.push("level " + pct(model.level));
+      summary.push("Δ " + pct(model.change));
+      if (model.ratePerMin !== null) summary.push(model.ratePerMin.toFixed(3) + " %/min");
+      summary.push("noise ±" + pct(model.noise, 2));
+    } else if (model.reason) {
+      summary.push(model.reason);
+    }
+    setText("sensorStamp", series ? series.channels.length + " ch · " + String(series.label || "").slice(0, 24) : "no source");
+    setText("sensorNote", summary.length
+      ? summary.join(" · ") + ". Descriptive, same-array, not concentration and not a safety verdict."
+      : "The array is a change detector. It cannot clear a batch, name a compound, or measure concentration.");
   }
+
   function renderLogs(logs) {
-    var host = $("#logList");
-    host.textContent = "";
+    var hostEl = $("#logList");
+    hostEl.textContent = "";
     setText("logStamp", logs.length ? logs.length + " reading" + (logs.length === 1 ? "" : "s") : "no readings");
     if (!logs.length) {
       var empty = document.createElement("div");
       empty.className = "log-empty";
       empty.textContent = "No readings. Add pH, temperature, and a visual note when you inspect the vessel.";
-      host.appendChild(empty);
+      hostEl.appendChild(empty);
       return;
     }
     logs.slice().reverse().forEach(function (log) {
@@ -676,6 +1484,7 @@
       var dayVal = num(log.values.day);
       var phVal = num(log.values.ph);
       var tempVal = num(log.values.temp);
+      var sgVal = num(log.values.sg);
       var day = document.createElement("span");
       day.className = "k";
       day.textContent = "D" + (dayVal !== null ? dayVal : "—");
@@ -683,6 +1492,9 @@
       ph.textContent = "pH " + (phVal !== null ? phVal : "—");
       var temp = document.createElement("span");
       temp.textContent = (tempVal !== null ? tempVal : "—") + "°";
+      var sg = document.createElement("span");
+      sg.className = "k";
+      sg.textContent = sgVal !== null ? sgVal.toFixed(3) : "SG —";
       var smell = document.createElement("span");
       smell.className = "note smell";
       smell.textContent = log.values.smell || "—";
@@ -705,15 +1517,16 @@
         event.stopPropagation();
         bridge.action({ type: "remove-log", id: log.id });
       });
-      row.appendChild(day); row.appendChild(ph); row.appendChild(temp);
+      row.appendChild(day); row.appendChild(ph); row.appendChild(temp); row.appendChild(sg);
       row.appendChild(smell); row.appendChild(visual); row.appendChild(fault); row.appendChild(action); row.appendChild(del);
       row.addEventListener("click", function () {
         selectedLogId = selectedLogId === log.id ? null : log.id;
         renderAll();
       });
-      host.appendChild(row);
+      hostEl.appendChild(row);
     });
   }
+
   function renderRules() {
     var rules = [
       ["stop", "pH above 4.6 after 48 h in a low-acid ferment", "Stop. Chill or discard per the tested recipe; verify with a calibrated meter. Do not rely on smell."],
@@ -722,8 +1535,8 @@
       ["warn", "No bubbles, no acidity, warm room, day 3", "Treat as stalled or risky. Verify pH and temperature; do not assume it is safe."],
       ["info", "Clean sour smell, pH in target, no visible faults", "Continue the protocol. This is not a safety certificate."]
     ];
-    var host = $("#rules");
-    host.textContent = "";
+    var hostEl = $("#rules");
+    hostEl.textContent = "";
     rules.forEach(function (r) {
       var row = document.createElement("div");
       row.className = "rule " + r[0];
@@ -739,21 +1552,30 @@
       then.textContent = r[2];
       copy.appendChild(when); copy.appendChild(then);
       row.appendChild(sev); row.appendChild(copy);
-      host.appendChild(row);
+      hostEl.appendChild(row);
     });
   }
+
   function renderAll() {
     if (!data) return;
     renderFields();
     var logs = sortedLogs();
-    renderPhase(logs);
+    var model = arrayModel();
+    renderPhaseStrip(logs, model);
     renderVerdict(logs);
     renderChart(logs);
-    renderSensor();
+    renderArray(model);
+    renderDisagreements(logs, model);
+    renderFacts(logs, model);
+    renderReference(model);
+    renderPhaseHistory();
+    renderJournal();
     renderLogs(logs);
-    var source = data.series;
-    setText("sourceBadge", source ? (source.source === "live" ? "LIVE ARRAY" : "RECORDING") : "NO SENSOR");
+    noteDisagreements(logs, model);
+    var series = data.series;
+    setText("sourceBadge", series ? (series.source === "live" ? "LIVE ARRAY" : "RECORDING") : "NO SENSOR");
   }
+
   function sendResize() {
     var h = Math.ceil(document.documentElement.scrollHeight);
     if (Math.abs(h - lastSentHeight) > 8) {
@@ -761,44 +1583,100 @@
       bridge.action({ type: "resize", height: h });
     }
   }
+
   bridge.onData(function (payload) {
     data = payload;
     renderAll();
     window.requestAnimationFrame(sendResize);
   });
 
-  document.querySelectorAll("[data-action]").forEach(function (button) {
-    button.addEventListener("click", function () {
-      bridge.action({ type: button.dataset.action });
+  if (host) {
+    host.on("tick", renderLiveTick);
+    host.on("event", function () { refreshJournal(); });
+    host.retrieve("source").then(function (source) {
+      if (typeof source === "string" && source) bridge.action({ type: "set-source", source: source });
+    }).catch(function () {});
+    host.retrieve("reference").then(function (stored) {
+      if (stored && finite(stored.level) && Array.isArray(stored.channels)) {
+        reference = stored;
+        renderAll();
+      }
+    }).catch(function () {});
+    refreshJournal();
+  }
+
+  function refreshJournal() {
+    if (!host) return;
+    host.getEvents(500).then(function (events) {
+      journalEvents = Array.isArray(events) ? events : [];
+      renderAll();
+    }).catch(function () { journalEvents = []; });
+  }
+
+  $("#exportJournal").addEventListener("click", function () {
+    if (!host) { bridge.toast("The host SDK is not available in this frame."); return; }
+    host.requestAction("journal-download", { format: "csv" }).then(function () {
+      bridge.toast("Journal exported.");
+    }).catch(function () {
+      host.exportJournal("csv").then(function (text) {
+        var blob = new Blob([text], { type: "text/csv" });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = "fermentation-journal.csv";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+        bridge.toast("Journal exported.");
+      }).catch(function (fallbackError) {
+        bridge.toast(fallbackError && fallbackError.message ? fallbackError.message : "Journal export failed.");
+      });
     });
+  });
+
+  document.querySelectorAll("[data-action]").forEach(function (button) {
+    button.addEventListener("click", function () { bridge.action({ type: button.dataset.action }); });
   });
 
   document.querySelectorAll("[data-field]").forEach(function (input) {
     input.addEventListener("change", function () {
-      bridge.action({ type: "save-field", key: input.dataset.field, value: input.value });
+      var key = input.dataset.field;
+      var previous = fieldValue(key) || (key === "status" ? "active" : "");
+      bridge.action({ type: "save-field", key: key, value: input.value });
+      if (key === "status" && input.value !== previous && host && host.capabilities.logEvents) {
+        var logs = sortedLogs();
+        host.logEvent("batch", "Batch status: " + previous + " → " + input.value, {
+          previous: previous,
+          status: input.value,
+          day: currentDay(logs),
+          ph: latestValue(logs, "ph"),
+          temp: latestValue(logs, "temp")
+        }).catch(function () {});
+      }
     });
   });
 
   $("#sourceSelect").addEventListener("change", function (event) {
     bridge.action({ type: "set-source", source: event.target.value });
+    if (host && host.capabilities.persist) host.persist("source", event.target.value).catch(function () {});
   });
+  $("#setReference").addEventListener("click", captureReference);
+  $("#clearReference").addEventListener("click", clearReference);
 
   function submitLogForm() {
+    if (isClosed()) {
+      bridge.toast("This batch is closed. Set the batch status back to in progress to add a reading.");
+      return;
+    }
     var formEl = $("#logForm");
     var dayInput = formEl.querySelector('[name="day"]');
     var startedDay = dateDay(fieldValue("started"));
-    if (dayInput && !String(dayInput.value).trim() && startedDay !== null) {
-      dayInput.value = String(startedDay);
-    }
+    if (dayInput && !String(dayInput.value).trim() && startedDay !== null) dayInput.value = String(startedDay);
     var form = new FormData(formEl);
     var values = {};
-    form.forEach(function (value, key) {
-      if (String(value).trim()) values[key] = String(value).trim();
-    });
-    if (!Object.keys(values).length) {
-      bridge.toast("Add at least one value to the reading.");
-      return;
-    }
+    form.forEach(function (value, key) { if (String(value).trim()) values[key] = String(value).trim(); });
+    if (!Object.keys(values).length) { bridge.toast("Add at least one value to the reading."); return; }
     bridge.action({ type: "add-log", values: values });
     formEl.reset();
     if (dayInput) dayInput.value = String(currentDay(sortedLogs()) + 1);

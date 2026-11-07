@@ -1,20 +1,36 @@
 {
-  "schema": "osmograph.domain-pack/1",
+  "schema": "osmograph.domain-pack/2",
   "id": "praisejamesx.fermentation",
   "name": "Fermentation Lab",
-  "version": "0.4.1",
+  "version": "0.6.0",
   "author": "@praisejamesx",
   "license": "CC-BY-4.0",
   "risk": "high",
   "domain": "fermentation",
   "tagline": "Track the batch, not just the bubble.",
-  "summary": "A workspace for tracking a ferment with pH, temperature, visual cues, and your own array baseline — with food safety kept out of the smell channel.",
+  "summary": "A batch log for home fermentation that reads the live array as a change detector, compares its phase estimate to the logged pH, gravity, and temperature, and keeps every safety verdict on the primary controls.",
+  "scope": "Support one batch at a time: log pH, temperature, gravity, and visible faults; state the recipe boundary; and surface where a same-array change signal disagrees with those primary controls. It does not certify safety and does not identify a pathogen or a toxin.",
+  "limits": [
+    "Not a pathogen or toxin test. pH, time, temperature, recipe, and visible evidence decide; a pleasant smell cannot clear a batch.",
+    "Not a pH meter and not a concentration measurement. The array sees a cross-sensitive mixture.",
+    "Same array, same sample preparation, same distance. The array panel does not transfer across rigs.",
+    "A sealed ferment displaces oxygen with CO₂, which can flatten a MOX response without the fermentation stopping.",
+    "The array phase is a shape estimate from one window, not a laboratory measurement of fermentation stage."
+  ],
   "whatItIs": "A protocol, log, and decision-support workspace for home fermentation. It helps you record what changed, compare a batch to a reference blank on the same array, and stop when the primary controls say stop.",
   "whatItIsNot": "Not a pathogen test, not a pH meter, not a universal fermentation classifier, and not a cross-rig claim. A pleasant smell cannot clear a batch.",
+  "capabilities": [
+    "read:live",
+    "read:baseline",
+    "log:events",
+    "write:persist",
+    "action:request",
+    "export:data"
+  ],
   "ui": {
     "runtime": "sandbox/1",
     "entry": "ui.html",
-    "height": 1040
+    "height": 1120
   },
   "homeUi": {
     "runtime": "sandbox/1",
@@ -23,12 +39,12 @@
   },
   "home": {
     "headline": "The batch is the record, not the bubble.",
-    "detail": "pH, temperature, recipe, and visible faults decide. The array only shows that something moved on this rig.",
+    "detail": "pH, temperature, gravity, recipe, and visible faults decide. The array adds a same-array phase estimate and names where it disagrees with those controls.",
     "metrics": [
-      { "label": "Batch", "value": "logged" },
-      { "label": "Primary controls", "value": "pH · temp" },
-      { "label": "Array", "value": "same-rig change" },
-      { "label": "Journal", "value": "local-only" }
+      { "label": "Batch", "value": "logged", "hint": "One batch at a time, with recipe and start date." },
+      { "label": "Primary controls", "value": "pH · temp · SG", "hint": "These decide; the array never overrules them." },
+      { "label": "Array", "value": "phase estimate", "hint": "Lag, active, stationary, or decline beyond the array's own noise." },
+      { "label": "Journal", "value": "local-only", "hint": "Exportable; not a certification record." }
     ],
     "actions": [
       { "id": "workspace", "label": "Open workspace", "kind": "open-workspace" },
@@ -36,17 +52,24 @@
       { "id": "datasets", "label": "Datasets", "kind": "open-datasets" }
     ],
     "limits": [
-      "A pleasant smell cannot clear a batch. pH, time, temperature, recipe, and visible evidence decide."
+      "A pleasant smell cannot clear a batch. pH, time, temperature, recipe, and visible evidence decide.",
+      "The array phase can flatten when CO₂ displaces oxygen; it is not a completion test.",
+      "Readings do not transfer across arrays, sample preparation, or distance."
     ],
     "sources": [
-      "FDA Bad Bug Book (2012); USDA Complete Guide to Home Canning (2015); 21 CFR 114."
+      "FDA Bad Bug Book (2012); USDA Complete Guide to Home Canning (2015); 21 CFR 114.",
+      "Hutkins, R. W. (2006). Microbiology and Technology of Fermented Foods. IFT Press / Blackwell.",
+      "Leroy, F. & De Vuyst, L. (2004). Lactic acid bacteria as functional starter cultures for the food fermentation industry. Trends in Food Science & Technology 15(2), 67–78."
     ]
   },
   "citations": [
     "FDA. Bad Bug Book: Foodborne Pathogenic Microorganisms and Natural Toxins, 2nd ed. (2012).",
     "USDA. Complete Guide to Home Canning (2015).",
     "Codex Alimentarius. General Principles of Food Hygiene (CXC 1-1969, rev.).",
-    "21 CFR 114 / FDA acidified foods guidance uses pH 4.6 as the botulism-control boundary for low-acid foods."
+    "21 CFR 114 / FDA acidified foods guidance uses pH 4.6 as the botulism-control boundary for low-acid foods.",
+    "Hutkins, R. W. (2006). Microbiology and Technology of Fermented Foods. IFT Press / Blackwell.",
+    "Leroy, F. & De Vuyst, L. (2004). Lactic acid bacteria as functional starter cultures for the food fermentation industry. Trends in Food Science & Technology 15(2), 67–78.",
+    "Barsan, N. & Weimar, U. (2003). Metal oxide gas sensors in the presence of humidity. Journal of Physics: Condensed Matter 15(20), R813–R839."
   ],
   "widgets": [
     {
@@ -63,7 +86,7 @@
       "body": "A Vial can tell you a sample changed on your array. It cannot tell you a batch is safe. pH, time, temperature, recipe, and visible evidence decide.",
       "always": [
         "Use a calibrated pH meter and a tested recipe.",
-        "Log every batch: date, salt or brine, temperature, pH, and visual cues.",
+        "Log every batch: date, salt or brine, temperature, pH, gravity, and visual cues.",
         "When in doubt, discard. Discard is a valid batch outcome."
       ],
       "never": [
@@ -78,8 +101,8 @@
       "items": [
         {
           "label": "Array can do",
-          "value": "Change detection",
-          "hint": "Same array, same sample prep, against your own reference blank."
+          "value": "Phase estimate",
+          "hint": "Lag, active, stationary, or decline beyond the array's own noise on one window."
         },
         {
           "label": "Array cannot do",
@@ -88,8 +111,8 @@
         },
         {
           "label": "Primary controls",
-          "value": "pH · time · temp",
-          "hint": "These decide. The nose only flags that something changed."
+          "value": "pH · time · temp · SG",
+          "hint": "These decide. The nose only flags where something changed or disagrees."
         }
       ]
     },
@@ -148,18 +171,18 @@
         {
           "label": "Prep",
           "range": "Day 0",
-          "body": "Clean the vessel and hands. Weigh salt or measure brine. Label the batch. Record starting pH and temperature."
+          "body": "Clean the vessel and hands. Weigh salt or measure brine. Label the batch. Record starting pH, gravity, and temperature."
         },
         {
           "label": "Lag",
           "range": "Day 1–3",
-          "body": "Bubbles may be quiet. Keep solids submerged. Log pH, temperature, smell, and anything visible.",
-          "warn": "No bubbles at day 3 is a prompt to verify pH and temperature, not to assume it is safe."
+          "body": "Bubbles may be quiet and the array may not move beyond noise. Keep solids submerged. Log pH, temperature, gravity, smell, and anything visible.",
+          "warn": "No array movement and no acidity at day 3 is a prompt to verify the seal, temperature, and pH — not to assume it is safe."
         },
         {
           "label": "Active",
           "range": "Day 4–10",
-          "body": "Acidity should move toward the recipe target. Keep temperature stable. Off-odours, slime, or fuzzy growth are stop signals."
+          "body": "Acidity should move toward the recipe target and gravity should fall. Keep temperature stable. Off-odours, slime, or fuzzy growth are stop signals."
         },
         {
           "label": "Finish",
@@ -222,6 +245,12 @@
           "type": "number",
           "unit": "°C",
           "placeholder": "21"
+        },
+        {
+          "id": "sg",
+          "label": "Specific gravity",
+          "type": "number",
+          "placeholder": "1.040"
         },
         {
           "id": "smell",
@@ -292,7 +321,7 @@
           "y": 3.8
         }
       ],
-      "note": "The line is your log. The example is not a target and not a safety curve. Follow the recipe and measure pH."
+      "note": "The line is your log, labeled EXAMPLE until you have two readings. It is not a target and not a safety curve. Follow the recipe and measure pH."
     },
     {
       "type": "rules",
@@ -368,7 +397,7 @@
     {
       "type": "rig",
       "title": "Use this with your rig",
-      "body": "Record a clean reference blank, then a batch sample on the same channels and sample prep. Compare with Check. If the arrays differ, the app will refuse the comparison.",
+      "body": "Record a clean reference blank, then a batch sample on the same channels and sample prep. Compare with Check. If the arrays differ, the app will refuse the comparison. The array panel is optional context; the batch log works without it.",
       "cta": "Open Check"
     }
   ],
@@ -377,8 +406,9 @@
       "id": "how",
       "title": "How to use this workspace",
       "body": [
-        "Start one batch. Fill the batch fields, then add a reading whenever you measure pH, temperature, or inspect the vessel.",
-        "The array is a change detector: capture a clean reference and a sample on the same array, then compare them in Check. Do not compare a batch from one rig with a reference from another.",
+        "Start one batch. Fill the batch fields, then add a reading whenever you measure pH, temperature, or gravity, or inspect the vessel.",
+        "The verdict uses the structured visible-fault choice, pH, temperature, ferment type, and target. Free-text smell and visual notes are context; they are not keyword triggers.",
+        "The array panel is a same-array change detector. Choose a live source; the workspace reads the host's baseline-relative response and states where its phase estimate disagrees with the log.",
         "The stop rules are deliberately conservative. A sensor reading cannot clear a batch; it can only add a prompt to look, measure, or discard."
       ]
     },
@@ -388,7 +418,30 @@
       "body": [
         "A MOX array responds to a mixture of volatile compounds. Ethanol, organic acids, and other fermentation products can dominate the response, and high concentrations can saturate or poison a sensor.",
         "The useful signal is a change relative to a reference on the same array. The absolute number is not concentration and is not comparable across rigs.",
-        "Humidity, temperature, sample distance, and vessel headspace all change the reading. Log them as context, not as afterthoughts."
+        "Metal-oxide sensors respond to humidity and temperature as well as to reducing gases. The array phase is withheld when the vessel environment moves more than two degrees or eight percent relative humidity during the window.",
+        "A sealed ferment displaces oxygen with CO₂. That can flatten or shift the response without the fermentation stopping, which is why a flat array is never read as “finished”."
+      ]
+    },
+    {
+      "id": "array-phase",
+      "title": "How the array phase is estimated",
+      "body": [
+        "The workspace takes the median baseline-relative response across live, non-dead channels, over roughly the last three minutes of the host window.",
+        "It compares the change across that window to the median two-times-CV noise band of the same channels. A change inside the band is not movement.",
+        "The estimate has four states: lag (near the baseline and flat), active (rising beyond noise), stationary (elevated but flat), and decline (falling beyond noise). An active phase that has lost more than half its rate is labeled slowing.",
+        "A new phase must hold for three consecutive windows before it is written to the journal, and at most once a minute. A phase that flickers with noise is not an observation.",
+        "The estimate is descriptive. It is not a lab measurement, not a completion test, and it never overrules pH, gravity, temperature, or a visible fault."
+      ]
+    },
+    {
+      "id": "disagreement",
+      "title": "What the disagreement notes mean",
+      "body": [
+        "Acidity still falling while the array is flat: CO₂ displacement or sensor behaviour can flatten the array. Keep measuring pH; do not read the flat trace as finished.",
+        "Array rising while pH is flat: one of the two signals is misleading. Verify the pH meter calibration and add a reading before drawing a conclusion.",
+        "No array movement by day three: slow start, cold vessel, poor seal, or a sensor that is not seeing the headspace. Verify the seal and temperature, then re-check pH.",
+        "Gravity flat while the array moves: re-measure gravity and inspect the vessel. The two signals should be reconciled before packaging.",
+        "Every note is a prompt to check a primary control. It is not a diagnosis and it is not a safety verdict."
       ]
     },
     {
@@ -411,6 +464,15 @@
       ]
     },
     {
+      "id": "profile",
+      "title": "The profile is a starting point, not evidence",
+      "body": [
+        "The declared profile uses a 300 s warmup, a 120 s R0 window, a three-sample median, delta-over-R0 response, and a 120 s warning persistence with 30% hysteresis.",
+        "Those values are reasoned defaults for a batch headspace on a small MOX array. They have not been measured against a held-out fermentation dataset, so the Vial installs as Ungated.",
+        "Add a held-out report to the evidence block before describing any of these values as validated."
+      ]
+    },
+    {
       "id": "clean",
       "title": "Cleaning and traceability",
       "body": [
@@ -426,8 +488,45 @@
         "USDA. Complete Guide to Home Canning (2015).",
         "Codex Alimentarius. General Principles of Food Hygiene (CXC 1-1969, rev.).",
         "21 CFR 114 / FDA acidified foods guidance: pH 4.6 is the botulism-control boundary for low-acid foods.",
-        "These are references for the safety context, not an endorsement of this Vial or a substitute for local food-safety guidance."
+        "Hutkins, R. W. (2006). Microbiology and Technology of Fermented Foods. IFT Press / Blackwell.",
+        "Leroy, F. & De Vuyst, L. (2004). Lactic acid bacteria as functional starter cultures for the food fermentation industry. Trends in Food Science & Technology 15(2), 67–78.",
+        "Barsan, N. & Weimar, U. (2003). Metal oxide gas sensors in the presence of humidity. Journal of Physics: Condensed Matter 15(20), R813–R839.",
+        "These are references for the safety and sensor context, not an endorsement of this Vial or a substitute for local food-safety guidance."
       ]
     }
-  ]
+  ],
+  "anomaly": {
+    "baseline": {
+      "protocol": "first-n",
+      "warmupS": 300,
+      "r0WindowS": 120
+    },
+    "transforms": {
+      "conditioning": [
+        "median3"
+      ],
+      "response": "delta-over-r0"
+    },
+    "detection": {
+      "enabled": true,
+      "sensitivity": 1,
+      "minChannels": 2,
+      "levelBudget": 0,
+      "levelRefS": 0,
+      "alertThreshold": 0.6,
+      "perChannelLimits": {},
+      "hysteresis": 0.3,
+      "escalation": {
+        "warningS": 120,
+        "criticalS": 900,
+        "emergencyS": 3600,
+        "resetNormalS": 1800
+      },
+      "farTargetPerMonth": null
+    },
+    "admissibility": {
+      "requireBaseline": "ready",
+      "minCoverage": 0.8
+    }
+  }
 }

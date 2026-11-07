@@ -2,20 +2,22 @@
 
 An author-hosted Osmograph domain Vial for home fermentation.
 
-**Status:** local project, not yet pushed or published. The web app does not host this
-source. Install it from this project's manifest URL once it is published.
+**Status:** v0.6.0. Installs as **Ungated** because it has no held-out evidence
+block. It is not a reviewed Aromatory listing and it makes no measured
+false-alarm, latency, or minimum-detectable-effect claim. The host gate and the
+project tests pass; real-rig validation is still outstanding.
 
 ## What is here
 
 | File | Purpose |
 |---|---|
-| `vial.json` | The `osmograph.domain-pack/1` manifest |
+| `vial.json` | The `osmograph.domain-pack/2` manifest and anomaly profile |
 | `ui.html` | The sandboxed workspace body fragment |
 | `home.html` | The compact sandboxed Home view |
 
 The workspace is the authority for the batch log, recipe fields, stop rules, and
 exports. The Home view is a status surface over the same host payload; it is not a
-second protocol.
+second protocol. The anomaly profile is a change detector, not a safety verdict.
 
 ## Validate
 
@@ -26,8 +28,15 @@ cd /home/praisejamesx/Documents/Documents/Research/coglab/OpenSmell/osmograph-de
 npm run validate:vial -- /home/praisejamesx/Documents/Documents/code/osmograph-vials/fermentation-lab
 ```
 
-The validator checks the manifest and both companion UI fragments. It is a local
-policy gate, not a security certification or a food-safety review.
+From the `opensmell-rs` repository:
+
+```bash
+noses lint /home/praisejamesx/Documents/Documents/code/osmograph-vials/fermentation-lab
+noses test /home/praisejamesx/Documents/Documents/code/osmograph-vials/fermentation-lab
+```
+
+`noses lint` and `noses test` pass with warnings. `noses publish` refuses until
+a real evidence block exists; that is deliberate.
 
 Run the project's own contract test:
 
@@ -46,7 +55,7 @@ host cannot fetch `ui.html` or `home.html` from a file import.
 This Vial records pH, temperature, recipe, style, target, structured visible
 faults, smell observations, and optional array readings. It refuses to turn a
 pleasant smell into a safety verdict. It is not a pathogen test, a pH meter, or a
-cross-rig classifier.
+cross-rig classifier. The primary measurement still decides safety.
 
 ## License
 
