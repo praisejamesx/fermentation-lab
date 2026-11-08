@@ -172,6 +172,7 @@
   <div class="phase-strip">
     <span class="phase-pill" id="phasePill">NOT STARTED</span>
     <span class="phase-pill" id="arrayPill">ARRAY —</span>
+    <span class="phase-pill" id="profilePill">PROFILE —</span>
     <span class="phase-copy" id="phaseCopy">Add a reading to start the batch clock.</span>
     <span class="phase-score" id="protocolScore">0/7 primary controls</span>
   </div>
@@ -630,6 +631,7 @@
     var model = {
       ready: false, reason: "", rows: [], level: null, noise: null,
       change: null, ratePerMin: null, phase: null, confounded: false,
+      profileActive: false, profileChannels: [], profileAdmissible: true,
       env: { temp: null, rh: null }, windowSec: 180, deadCount: 0
     };
     if (!series || !snapshot) { model.reason = "No host window."; return model; }
@@ -693,6 +695,10 @@
     model.env = env;
     model.confounded = (env.temp !== null && Math.abs(env.temp) >= 2)
       || (env.rh !== null && Math.abs(env.rh) >= 8);
+    var det = snapshot.detection;
+    model.profileActive = !!(det && det.active);
+    model.profileChannels = det && Array.isArray(det.triggeredChannels) ? det.triggeredChannels : [];
+    model.profileAdmissible = !det || det.admissible !== false;
 
     if (snapshot.baseline && snapshot.baseline.state === "warming") {
       model.phase = { key: "warming", label: "Baseline forming", tone: "warn", detail: "The profile will not call a change until the baseline is ready." };
@@ -700,11 +706,13 @@
       model.phase = { key: "idle", label: "No baseline", tone: "", detail: "The host has no reference for this array." };
     } else if (model.confounded) {
       model.phase = { key: "confounded", label: "Enclosure moved", tone: "warn", detail: "Temperature or humidity moved more than the threshold; the array phase is withheld." };
+    } else if (!model.profileAdmissible) {
+      model.phase = { key: "refused", label: "Detector refused", tone: "warn", detail: (det && det.reason) || "The profile refuses to arm: the baseline or channel coverage is outside its declared gate." };
     } else if (Math.abs(model.change) < model.noise) {
       if (Math.abs(model.level) >= model.noise * 2) {
-        model.phase = { key: "stationary", label: "Stationary", tone: "live", detail: "The array is elevated but flat within its own noise for this window." };
+        model.phase = { key: "stationary", label: "Stationary", tone: "live", detail: "The array is elevated but flat within its own noise for this window." + (model.profileActive ? " The profile detector also sees a sustained change." : "") };
       } else {
-        model.phase = { key: "lag", label: "Lag", tone: "", detail: "No array movement beyond noise in this window." };
+        model.phase = { key: "lag", label: "Lag", tone: "", detail: "No array movement beyond noise in this window." + (model.profileActive ? " The profile detector still sees a sustained change; the slope is not the whole detector." : "") };
       }
     } else if (model.change > 0) {
       var half = Math.max(4, Math.floor(window.length / 2));
@@ -715,10 +723,10 @@
         key: "active", label: slowing ? "Active, slowing" : "Active", tone: "live",
         detail: slowing
           ? "The response is still above noise but the rate has fallen by more than half — a possible approach to stationary."
-          : "The response rose beyond the array's own noise over this window."
+          : "The response rose beyond the array's own noise over this window." + (model.profileActive ? " The profile detector confirms a sustained change." : " The profile detector has not confirmed a sustained change; this is a shape estimate.")
       };
     } else {
-      model.phase = { key: "decline", label: "Decline", tone: "warn", detail: "The response fell beyond the array's own noise over this window." };
+      model.phase = { key: "decline", label: "Decline", tone: "warn", detail: "The response fell beyond the array's own noise over this window." + (model.profileActive ? " The profile detector also sees a sustained change." : " The profile detector has not confirmed a sustained change; this is a shape estimate.") };
     }
     model.ready = true;
     return model;
@@ -869,6 +877,17 @@
       arrayPill.className = "phase-pill";
       arrayPill.textContent = "ARRAY —";
     }
+    var profilePill = $("#profilePill");
+    if (!model.ready || !model.profileAdmissible) {
+      profilePill.className = "phase-pill " + (model.ready ? "warn" : "");
+      profilePill.textContent = model.ready ? "PROFILE REFUSED" : "PROFILE —";
+    } else if (model.profileActive) {
+      profilePill.className = "phase-pill warn";
+      profilePill.textContent = "PROFILE ACTIVE";
+    } else {
+      profilePill.className = "phase-pill";
+      profilePill.textContent = "PROFILE QUIET";
+    }
     if (!phaseReady) {
       lastPhase = p.label;
       phaseReady = true;
@@ -961,7 +980,15 @@
     facts.push({
       k: "Array phase",
       v: model.ready ? model.phase.label : "—",
-      s: model.ready ? "same-array estimate" : model.reason || "no live window"
+      s: model.ready ? "same-array shape estimate; the profile detector is the change call" : model.reason || "no live window"
+    });
+    facts.push({
+      k: "Profile detector",
+      v: !model.ready ? "—" : !model.profileAdmissible ? "refused" : model.profileActive ? "ACTIVE" : "quiet",
+      s: model.profileActive
+        ? (model.profileChannels.length || 0) + " channel" + ((model.profileChannels.length || 0) === 1 ? "" : "s") + " cleared the profile"
+        : "the Vial profile is the detector; the noise band explains it",
+      tone: model.ready && model.profileActive ? "warn" : ""
     });
     facts.push({
       k: "Array noise",

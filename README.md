@@ -17,7 +17,10 @@ project tests pass; real-rig validation is still outstanding.
 
 The workspace is the authority for the batch log, recipe fields, stop rules, and
 exports. The Home view is a status surface over the same host payload; it is not a
-second protocol. The anomaly profile is a change detector, not a safety verdict.
+second protocol. The Vial profile is the change detector: the host requires at
+least two corroborating channels and applies the profile's persistence,
+hysteresis, confidence floor, and coverage gate. The array phase is a shape
+estimate, not a safety verdict.
 
 ## Validate
 

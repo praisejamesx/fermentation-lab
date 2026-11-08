@@ -41,15 +41,43 @@
     "headline": "The batch is the record, not the bubble.",
     "detail": "pH, temperature, gravity, recipe, and visible faults decide. The array adds a same-array phase estimate and names where it disagrees with those controls.",
     "metrics": [
-      { "label": "Batch", "value": "logged", "hint": "One batch at a time, with recipe and start date." },
-      { "label": "Primary controls", "value": "pH · temp · SG", "hint": "These decide; the array never overrules them." },
-      { "label": "Array", "value": "phase estimate", "hint": "Lag, active, stationary, or decline beyond the array's own noise." },
-      { "label": "Journal", "value": "local-only", "hint": "Exportable; not a certification record." }
+      {
+        "label": "Batch",
+        "value": "logged",
+        "hint": "One batch at a time, with recipe and start date."
+      },
+      {
+        "label": "Primary controls",
+        "value": "pH · temp · SG",
+        "hint": "These decide; the array never overrules them."
+      },
+      {
+        "label": "Array",
+        "value": "phase estimate",
+        "hint": "Lag, active, stationary, or decline beyond the array's own noise."
+      },
+      {
+        "label": "Journal",
+        "value": "local-only",
+        "hint": "Exportable; not a certification record."
+      }
     ],
     "actions": [
-      { "id": "workspace", "label": "Open workspace", "kind": "open-workspace" },
-      { "id": "check", "label": "Check", "kind": "open-check" },
-      { "id": "datasets", "label": "Datasets", "kind": "open-datasets" }
+      {
+        "id": "workspace",
+        "label": "Open workspace",
+        "kind": "open-workspace"
+      },
+      {
+        "id": "check",
+        "label": "Check",
+        "kind": "open-check"
+      },
+      {
+        "id": "datasets",
+        "label": "Datasets",
+        "kind": "open-datasets"
+      }
     ],
     "limits": [
       "A pleasant smell cannot clear a batch. pH, time, temperature, recipe, and visible evidence decide.",
@@ -217,7 +245,11 @@
           "id": "style",
           "label": "Ferment type",
           "type": "select",
-          "options": ["low-acid", "high-acid", "other"]
+          "options": [
+            "low-acid",
+            "high-acid",
+            "other"
+          ]
         },
         {
           "id": "target",
@@ -408,7 +440,7 @@
       "body": [
         "Start one batch. Fill the batch fields, then add a reading whenever you measure pH, temperature, or gravity, or inspect the vessel.",
         "The verdict uses the structured visible-fault choice, pH, temperature, ferment type, and target. Free-text smell and visual notes are context; they are not keyword triggers.",
-        "The array panel is a same-array change detector. Choose a live source; the workspace reads the host's baseline-relative response and states where its phase estimate disagrees with the log.",
+        "The array panel reads the host's baseline-relative response and states where its phase estimate disagrees with the log. The Vial profile is the change detector: the host requires at least two corroborating channels and applies the profile's persistence, hysteresis, confidence floor, and coverage gate.",
         "The stop rules are deliberately conservative. A sensor reading cannot clear a batch; it can only add a prompt to look, measure, or discard."
       ]
     },
@@ -427,7 +459,8 @@
       "title": "How the array phase is estimated",
       "body": [
         "The workspace takes the median baseline-relative response across live, non-dead channels, over roughly the last three minutes of the host window.",
-        "It compares the change across that window to the median two-times-CV noise band of the same channels. A change inside the band is not movement.",
+        "It compares the change across that window to the median two-times-CV noise band of the same channels. A change inside the band is not movement. The band explains the phase; it is not the profile detector.",
+        "The profile detector is the authoritative change call. The host requires at least two channels to clear their sensitivity-scaled budget, applies the 120 s warning persistence with 30% hysteresis, the 0.6 confidence floor, and the 80% coverage gate. A phase that moves without profile confirmation is shown as a shape estimate, not a confirmed change.",
         "The estimate has four states: lag (near the baseline and flat), active (rising beyond noise), stationary (elevated but flat), and decline (falling beyond noise). An active phase that has lost more than half its rate is labeled slowing.",
         "A new phase must hold for three consecutive windows before it is written to the journal, and at most once a minute. A phase that flickers with noise is not an observation.",
         "The estimate is descriptive. It is not a lab measurement, not a completion test, and it never overrules pH, gravity, temperature, or a visible fault."
@@ -467,8 +500,8 @@
       "id": "profile",
       "title": "The profile is a starting point, not evidence",
       "body": [
-        "The declared profile uses a 300 s warmup, a 120 s R0 window, a three-sample median, delta-over-R0 response, and a 120 s warning persistence with 30% hysteresis.",
-        "Those values are reasoned defaults for a batch headspace on a small MOX array. They have not been measured against a held-out fermentation dataset, so the Vial installs as Ungated.",
+        "The declared profile uses a 300 s warmup, a 120 s R0 window, a three-sample median, delta-over-R0 response, a two-channel corroboration floor, and a 120 s warning persistence with 30% hysteresis.",
+        "The host now enforces the corroboration floor, the confidence floor, and the coverage gate on the live path. Those are contract behaviour, not measured performance. The defaults have not been measured against a held-out fermentation dataset, so the Vial installs as Ungated.",
         "Add a held-out report to the evidence block before describing any of these values as validated."
       ]
     },

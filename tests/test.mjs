@@ -18,6 +18,13 @@ assert.equal(manifest.homeUi?.runtime, 'sandbox/1', 'homeUi must use the host sa
 assert.ok(manifest.anomaly?.baseline, 'v2 requires a baseline profile');
 assert.ok(manifest.anomaly?.detection, 'v2 requires a detection profile');
 assert.ok(manifest.anomaly.baseline.warmupS >= 0.5, 'baseline warmup must be at least 0.5 s');
+assert.ok(manifest.anomaly.detection.minChannels >= 2, 'these domain Vials require corroboration from at least two channels');
+assert.ok(manifest.anomaly.detection.alertThreshold > 0 && manifest.anomaly.detection.alertThreshold <= 1, 'the profile confidence floor must be a probability');
+assert.ok(manifest.anomaly.admissibility.minCoverage > 0 && manifest.anomaly.admissibility.minCoverage <= 1, 'the coverage gate must be a fraction');
+const workspace = readFileSync(join(root, manifest.ui.entry), 'utf8');
+assert.match(workspace, /snapshot\.detection|\.detection\b/, 'the workspace must read the host profile verdict');
+assert.match(workspace, /triggeredChannels/, 'the workspace must show which channels the profile triggered');
+assert.match(workspace, /profileActive/, 'the workspace must use the profile verdict as the change call');
 
 // Missing evidence is a warning, not a test failure: the host installs this as
 // Ungated. The test must not imply a held-out report exists when it does not.

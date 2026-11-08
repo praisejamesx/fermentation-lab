@@ -558,7 +558,7 @@
       setText("watchNote", "Triggered: " + (detection.triggeredChannels || []).join(", ") + " · confidence " + (snap.anomaly.confidence !== null ? (snap.anomaly.confidence * 100).toFixed(0) + "%" : "—") + ". The log and primary controls still decide.");
     } else if (baseline.state === "ready") {
       setPill("watchPill", "WATCH ON", "good");
-      setText("watchNote", "The profile is armed from the manifest. Limits are 2× each channel's measured CV; they cannot be edited here.");
+      setText("watchNote", "The profile is armed from the manifest. The 2×CV band explains the channels; the profile detector is the change call. Neither can be edited here.");
     } else {
       setPill("watchPill", "BASELINE " + String(baseline.state).toUpperCase(), "");
       setText("watchNote", "The profile will not call a change until the baseline is ready.");
