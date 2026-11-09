@@ -556,9 +556,12 @@
     } else if (detection && detection.active) {
       setPill("watchPill", "WATCH TRIGGERED", "warn");
       setText("watchNote", "Triggered: " + (detection.triggeredChannels || []).join(", ") + " · confidence " + (snap.anomaly.confidence !== null ? (snap.anomaly.confidence * 100).toFixed(0) + "%" : "—") + ". The log and primary controls still decide.");
+    } else if (baseline.state === "ready" && !detection) {
+      setPill("watchPill", "PROFILE PENDING", "");
+      setText("watchNote", "The baseline is ready, but the host has not produced a profile verdict yet. The 2×CV band explains the channels; it is not a change call.");
     } else if (baseline.state === "ready") {
-      setPill("watchPill", "WATCH ON", "good");
-      setText("watchNote", "The profile is armed from the manifest. The 2×CV band explains the channels; the profile detector is the change call. Neither can be edited here.");
+      setPill("watchPill", "PROFILE ARMED", "good");
+      setText("watchNote", "The profile has a verdict for this window. The 2×CV band explains the channels; the profile detector is the change call. Neither can be edited here.");
     } else {
       setPill("watchPill", "BASELINE " + String(baseline.state).toUpperCase(), "");
       setText("watchNote", "The profile will not call a change until the baseline is ready.");
@@ -612,6 +615,7 @@
     var target = num(fields.target);
     var status = quickStatus(logs);
     var day = currentDay(logs);
+    var batchStarted = logs.length > 0 || dateDay(fields.started) !== null;
     var phase = arrayPhase(data.series, data.snapshot);
     var tankShell = document.querySelector(".fhome-tank");
     if (tankShell) tankShell.className = "fhome-tank " + status.tone;
@@ -643,7 +647,7 @@
     setText("tankNote", data.series
       ? "Bubble motion is decorative. The figure is the median response change over the last window; the liquid tint is the last logged pH, not a measurement."
       : "No live array. The batch log and quick status still work; bubbles idle until a source is available.");
-    setPill("phasePill", phase ? phase.label.toUpperCase() : "NO ARRAY", phase ? phase.tone : "");
+    setPill("phasePill", !batchStarted ? "NOT STARTED" : phase ? phase.label.toUpperCase() : "NO ARRAY", !batchStarted ? "" : phase ? phase.tone : "");
     renderSources();
     drawChart(data.series);
     renderWatch();

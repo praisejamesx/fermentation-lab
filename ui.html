@@ -631,7 +631,8 @@
     var model = {
       ready: false, reason: "", rows: [], level: null, noise: null,
       change: null, ratePerMin: null, phase: null, confounded: false,
-      profileActive: false, profileChannels: [], profileAdmissible: true,
+      profileActive: false, profileChannels: [], profileAdmissible: true, profilePending: false,
+      batchStarted: false,
       env: { temp: null, rh: null }, windowSec: 180, deadCount: 0
     };
     if (!series || !snapshot) { model.reason = "No host window."; return model; }
@@ -699,8 +700,12 @@
     model.profileActive = !!(det && det.active);
     model.profileChannels = det && Array.isArray(det.triggeredChannels) ? det.triggeredChannels : [];
     model.profileAdmissible = !det || det.admissible !== false;
+    model.profilePending = !det;
+    model.batchStarted = sortedLogs().length > 0 || fieldValue("started") !== "";
 
-    if (snapshot.baseline && snapshot.baseline.state === "warming") {
+    if (!model.batchStarted) {
+      model.phase = { key: "not-started", label: "Not started", tone: "", detail: "Add the first reading to start the batch clock. The array is live, but there is no batch phase yet." };
+    } else if (snapshot.baseline && snapshot.baseline.state === "warming") {
       model.phase = { key: "warming", label: "Baseline forming", tone: "warn", detail: "The profile will not call a change until the baseline is ready." };
     } else if (snapshot.baseline && snapshot.baseline.state !== "ready") {
       model.phase = { key: "idle", label: "No baseline", tone: "", detail: "The host has no reference for this array." };
@@ -870,7 +875,7 @@
     setText("phaseCopy", p.copy);
     setText("protocolScore", p.score + "/7 primary controls");
     var arrayPill = $("#arrayPill");
-    if (model.ready && model.phase) {
+    if (model.ready && model.phase && model.batchStarted) {
       arrayPill.className = "phase-pill " + model.phase.tone;
       arrayPill.textContent = "ARRAY " + model.phase.label.toUpperCase();
     } else {
@@ -881,6 +886,9 @@
     if (!model.ready || !model.profileAdmissible) {
       profilePill.className = "phase-pill " + (model.ready ? "warn" : "");
       profilePill.textContent = model.ready ? "PROFILE REFUSED" : "PROFILE —";
+    } else if (model.profilePending) {
+      profilePill.className = "phase-pill";
+      profilePill.textContent = "PROFILE PENDING";
     } else if (model.profileActive) {
       profilePill.className = "phase-pill warn";
       profilePill.textContent = "PROFILE ACTIVE";
@@ -984,10 +992,12 @@
     });
     facts.push({
       k: "Profile detector",
-      v: !model.ready ? "—" : !model.profileAdmissible ? "refused" : model.profileActive ? "ACTIVE" : "quiet",
+      v: !model.ready ? "—" : !model.profileAdmissible ? "refused" : model.profilePending ? "pending" : model.profileActive ? "ACTIVE" : "quiet",
       s: model.profileActive
         ? (model.profileChannels.length || 0) + " channel" + ((model.profileChannels.length || 0) === 1 ? "" : "s") + " cleared the profile"
-        : "the Vial profile is the detector; the noise band explains it",
+        : model.profilePending
+          ? "the host has not produced a profile verdict yet; the noise band explains the channels"
+          : "the Vial profile is the detector; the noise band explains it",
       tone: model.ready && model.profileActive ? "warn" : ""
     });
     facts.push({

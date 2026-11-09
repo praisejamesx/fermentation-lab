@@ -2,7 +2,7 @@
 
 An author-hosted Osmograph domain Vial for home fermentation.
 
-**Status:** v0.6.0. Installs as **Ungated** because it has no held-out evidence
+**Status:** v0.6.1. Installs as **Ungated** because it has no held-out evidence
 block. It is not a reviewed Aromatory listing and it makes no measured
 false-alarm, latency, or minimum-detectable-effect claim. The host gate and the
 project tests pass; real-rig validation is still outstanding.
