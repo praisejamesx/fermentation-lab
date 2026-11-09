@@ -701,7 +701,7 @@
     model.profileChannels = det && Array.isArray(det.triggeredChannels) ? det.triggeredChannels : [];
     model.profileAdmissible = !det || det.admissible !== false;
     model.profilePending = !det;
-    model.batchStarted = sortedLogs().length > 0 || fieldValue("started") !== "";
+    model.batchStarted = sortedLogs().length > 0 || dateDay(fieldValue("started")) !== null;
 
     if (!model.batchStarted) {
       model.phase = { key: "not-started", label: "Not started", tone: "", detail: "Add the first reading to start the batch clock. The array is live, but there is no batch phase yet." };
