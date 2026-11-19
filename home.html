@@ -97,7 +97,7 @@
 .fhome-status .label { font-size: 13px; font-weight: 650; line-height: 1.1; margin: 1px 0 2px; }
 .fhome-status .copy { font-size: 9px; line-height: 1.4; color: var(--muted); }
 .fhome-status .stamp { margin-top: 5px; font-family: var(--mono); font-size: 7px; color: var(--muted-2); line-height: 1.4; }
-.fhome-quick { display: grid; grid-template-columns: 40px 52px 52px 62px minmax(64px, 1fr) auto; gap: 5px; align-items: end; padding: 7px 8px; border: 1px solid var(--line); background: var(--panel); }
+.fhome-quick { display: grid; grid-template-columns: 38px 50px 74px 52px 60px minmax(64px, 1fr) auto; gap: 5px; align-items: end; padding: 7px 8px; border: 1px solid var(--line); background: var(--panel); }
 .fhome-quick label { min-width: 0; }
 .fhome-quick .k { display: block; margin-bottom: 2px; font-family: var(--mono); font-size: 7px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted-2); }
 .fhome-quick input, .fhome-quick select { width: 100%; font-size: 9px; padding: 4px 5px; }
@@ -198,7 +198,7 @@
           <div class="eyebrow">PRIMARY CONTROLS</div>
           <div class="label" id="statusLabel">Not started</div>
           <div class="copy" id="statusCopy">Add a reading to start the batch clock. The workspace holds the full log and stop rules.</div>
-          <div class="stamp">Quick status only · the log and recipe decide. pH, temperature, ferment type, target, and structured visible faults are the inputs. A pleasant smell cannot clear a batch.</div>
+          <div class="stamp">Quick status only · the log and recipe decide. pH, pH-meter calibration, temperature, ferment type, target, and structured visible faults are the inputs. A pleasant smell cannot clear a batch.</div>
         </section>
 
         <section class="fhome-watch" id="watchCard">
@@ -216,6 +216,7 @@
       <form class="fhome-quick" id="quickLog">
         <label><span class="k">Day</span><input name="day" type="number" step="1" min="0" placeholder="—" /></label>
         <label><span class="k">pH</span><input name="ph" type="number" step="0.01" min="0" max="14" placeholder="4.1" /></label>
+        <label><span class="k">pH cal</span><select name="cal"><option value="">—</option><option value="yes">yes</option><option value="no">no</option><option value="not checked">not checked</option></select></label>
         <label><span class="k">°C</span><input name="temp" type="number" step="0.1" placeholder="21" /></label>
         <label><span class="k">SG</span><input name="sg" type="number" step="0.001" placeholder="1.040" /></label>
         <label><span class="k">Fault</span><select name="fault"><option value="none">none</option><option value="mould">mould</option><option value="slime">slime</option><option value="rope">rope</option><option value="other">other</option></select></label>
@@ -278,6 +279,23 @@
     }
     return null;
   }
+  function latestWith(logs, key) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      var v = num(logs[i].values[key]);
+      if (v !== null) return { value: v, log: logs[i] };
+    }
+    return null;
+  }
+  function calibrationOf(reading) {
+    if (!reading || !reading.log) return "";
+    return String((reading.log.values || {}).cal || "").trim().toLowerCase();
+  }
+  function calibrationLabel(cal) {
+    if (cal === "yes") return "calibrated";
+    if (cal === "no") return "not calibrated";
+    if (cal === "not checked") return "not checked";
+    return "not recorded";
+  }
   function maxDay(logs) {
     var best = null;
     logs.forEach(function (l) {
@@ -315,7 +333,9 @@
     var target = num(fieldValue("target"));
     var style = fieldValue("style").toLowerCase();
     var day = currentDay(logs);
-    var ph = latestValue(logs, "ph");
+    var phReading = latestWith(logs, "ph");
+    var ph = phReading ? phReading.value : null;
+    var phCal = calibrationOf(phReading);
     var temp = latestValue(logs, "temp");
     var fault = latestFault(logs);
     var latest = latestLog(logs);
@@ -332,7 +352,10 @@
       return { tone: "warn", label: "Unclassified fault", copy: "A visible fault is recorded but not classified. Inspect and follow the tested recipe's discard rule." };
     }
     if (style === "low-acid" && ph !== null && ph > 4.6 && day >= 2) {
-      return { tone: "stop", label: "Above 4.6", copy: "Low-acid ferment above the 4.6 boundary after day 2. Verify with a calibrated meter and stop." };
+      if (phCal !== "yes") {
+        return { tone: "stop", label: "Above 4.6 — verify meter", copy: "Low-acid ferment above the 4.6 boundary after day 2, but the meter is not recorded as calibrated. Treat it as a stop until a calibrated re-measure clears it." };
+      }
+      return { tone: "stop", label: "Above 4.6", copy: "Low-acid ferment above the 4.6 boundary after day 2 with a calibrated reading. Stop and follow the tested recipe." };
     }
     if (!style && ph !== null && ph > 4.6 && day >= 2) {
       return { tone: "warn", label: "Ferment type not set", copy: "If this is a low-acid ferment, the logged pH is above 4.6. Select the type or follow the tested recipe." };
@@ -346,6 +369,9 @@
     if (ph === null) {
       return { tone: "warn", label: "pH missing", copy: "The log has no pH reading. The sensor cannot stand in for the primary control." };
     }
+    if (phCal === "no") {
+      return { tone: "warn", label: "pH meter not calibrated", copy: "The latest pH reading is marked uncalibrated. Do not use it to call the batch at target; calibrate with fresh pH 4.0 and 7.0 buffers." };
+    }
     if (temp === null) {
       return { tone: "warn", label: "Temperature missing", copy: "The log has no temperature reading. Temperature changes the rate, not the safety boundary." };
     }
@@ -355,8 +381,11 @@
     if (latest && !String(latest.values.fault || "").trim()) {
       return { tone: "warn", label: "Fault field missing", copy: "This reading predates the structured visible-fault field. Add a new reading with a visible-fault choice." };
     }
+    if (ph <= target && phCal !== "yes") {
+      return { tone: "warn", label: "At target — calibration not confirmed", copy: "The logged pH is at or below target, but the reading is not backed by a recorded calibration. Calibrate and re-measure before closing the batch." };
+    }
     if (ph <= target) {
-      return { tone: "good", label: "At target", copy: "The logged pH is at or below your target. Hold the recipe; this is not a safety certificate." };
+      return { tone: "good", label: "At target", copy: "The logged pH is at or below your target and the meter is recorded as calibrated. Hold the recipe; this is not a safety certificate." };
     }
     return { tone: "info", label: "Active", copy: "The logged pH is above target. Keep the temperature stable and measure pH again on schedule." };
   }

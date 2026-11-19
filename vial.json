@@ -2,23 +2,135 @@
   "schema": "osmograph.domain-pack/2",
   "id": "praisejamesx.fermentation",
   "name": "Fermentation Lab",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "author": "@praisejamesx",
   "license": "CC-BY-4.0",
   "risk": "high",
   "domain": "fermentation",
   "tagline": "Track the batch, not just the bubble.",
-  "summary": "A batch log for home fermentation that reads the live array as a change detector, compares its phase estimate to the logged pH, gravity, and temperature, and keeps every safety verdict on the primary controls.",
-  "scope": "Support one batch at a time: log pH, temperature, gravity, and visible faults; state the recipe boundary; and surface where a same-array change signal disagrees with those primary controls. It does not certify safety and does not identify a pathogen or a toxin.",
+  "summary": "A batch log for home fermentation that reads the live array as a change detector, compares the array shape to a trend-driven pH and gravity phase, gates at-target calls on a recorded pH-meter calibration, and keeps every safety verdict on the primary controls.",
+  "scope": "Support one batch at a time: log pH, pH-meter calibration, temperature, gravity, and visible faults; state the recipe boundary and end day; and surface where a same-array change signal disagrees with those primary controls. It does not certify safety and does not identify a pathogen or a toxin.",
   "limits": [
     "Not a pathogen or toxin test. pH, time, temperature, recipe, and visible evidence decide; a pleasant smell cannot clear a batch.",
     "Not a pH meter and not a concentration measurement. The array sees a cross-sensitive mixture.",
     "Same array, same sample preparation, same distance. The array panel does not transfer across rigs.",
     "A sealed ferment displaces oxygen with CO₂, which can flatten a MOX response without the fermentation stopping.",
-    "The array phase is a shape estimate from one window, not a laboratory measurement of fermentation stage."
+    "The array phase is a shape estimate from one window, not a laboratory measurement of fermentation stage.",
+    "A missing calibration record withholds an at-target call; it does not clear a high-pH stop."
   ],
   "whatItIs": "A protocol, log, and decision-support workspace for home fermentation. It helps you record what changed, compare a batch to a reference blank on the same array, and stop when the primary controls say stop.",
   "whatItIsNot": "Not a pathogen test, not a pH meter, not a universal fermentation classifier, and not a cross-rig claim. A pleasant smell cannot clear a batch.",
+  "claims": [
+    {
+      "id": "same-array-change",
+      "provides": "A same-array change call when at least two channels clear their sensitivity-scaled budget and the profile's persistence, hysteresis, confidence, and coverage gates hold.",
+      "evidence": [
+        "Barsan & Weimar (2003), MOX cross-sensitivity and humidity response.",
+        "v0.6.1 profile defaults; unmeasured on a held-out fermentation dataset."
+      ],
+      "limits": [
+        "Same array, same sample preparation, same distance.",
+        "Not a concentration measurement and not a safety verdict.",
+        "A sealed ferment can flatten the array without the batch stopping."
+      ],
+      "status": "reasoned-default",
+      "supports": [
+        "sensitivity",
+        "minChannels",
+        "levelBudget",
+        "levelRefS",
+        "alertThreshold",
+        "hysteresis",
+        "escalation"
+      ]
+    },
+    {
+      "id": "batch-record",
+      "provides": "A local batch record of pH, temperature, gravity, recipe, recipe end day, pH-meter calibration status, visible faults, and actions.",
+      "evidence": [
+        "FDA Bad Bug Book (2012); USDA Complete Guide to Home Canning (2015); 21 CFR 114.",
+        "Hutkins (2006), Microbiology and Technology of Fermented Foods."
+      ],
+      "limits": [
+        "The log is not a certification record.",
+        "The primary controls decide safety; the array never overrules them."
+      ],
+      "status": "reasoned-default"
+    },
+    {
+      "id": "trend-calibration",
+      "provides": "A trend-driven phase that refuses an at-target call when the latest pH reading is not recorded as calibrated.",
+      "evidence": [
+        "FDA Bad Bug Book (2012); USDA Complete Guide to Home Canning (2015).",
+        "Hutkins (2006), Microbiology and Technology of Fermented Foods.",
+        "v0.6.1 reasoned default; the calibration gate is not a substitute for a calibrated meter."
+      ],
+      "limits": [
+        "A missing calibration record is not proof that the meter is wrong; it withholds the at-target call.",
+        "Two readings are required before a trend can be stated.",
+        "The array cannot substitute for pH or gravity."
+      ],
+      "status": "reasoned-default",
+      "supports": [
+        "cal",
+        "endDay",
+        "ph",
+        "sg"
+      ]
+    },
+    {
+      "id": "safety-refusal",
+      "provides": "A refusal to convert a pleasant smell into a safety verdict.",
+      "evidence": [
+        "FDA Bad Bug Book (2012); USDA Complete Guide to Home Canning (2015); 21 CFR 114.",
+        "Leroy & De Vuyst (2004), lactic acid bacteria starter cultures."
+      ],
+      "limits": [
+        "No pathogen or toxin test.",
+        "pH, time, temperature, recipe, and visible evidence decide."
+      ],
+      "status": "reasoned-default"
+    },
+    {
+      "id": "phase-estimate",
+      "provides": "A descriptive lag, active, no-progress, or finish-window phase from the logged pH and gravity trends, with the array phase shown separately.",
+      "evidence": [
+        "v0.6.1 profile defaults; unmeasured on a held-out dataset.",
+        "Barsan & Weimar (2003), humidity and temperature sensitivity."
+      ],
+      "limits": [
+        "The phase is a trend statement from the log, not a laboratory measurement of fermentation stage.",
+        "A flat array is never read as finished.",
+        "A pH-based at-target call requires a recorded calibration."
+      ],
+      "status": "reasoned-default"
+    }
+  ],
+  "sensor": {
+    "technology": "mox",
+    "channels": {
+      "min": 2,
+      "max": 8,
+      "unit": "delta-over-r0"
+    },
+    "notes": "Baseline-relative MOX array. The host owns channel metadata; this Vial does not assume an NDIR or spectral channel."
+  },
+  "processSensors": [
+    {
+      "id": "ph",
+      "label": "pH",
+      "quantity": "pH",
+      "unit": "pH",
+      "required": false,
+      "sources": [
+        "probe",
+        "manual"
+      ],
+      "calibration": "two-point (pH 4.0 and 7.0 buffers)",
+      "fallback": "manual",
+      "notes": "A primary process measurement, not a gas channel. It must not be fed into the MOX anomaly array; the host exposes it separately. An uncalibrated or stale probe withholds at-target calls; a high-pH low-acid reading remains a provisional stop until re-measured."
+    }
+  ],
   "capabilities": [
     "read:live",
     "read:baseline",
@@ -39,7 +151,7 @@
   },
   "home": {
     "headline": "The batch is the record, not the bubble.",
-    "detail": "pH, temperature, gravity, recipe, and visible faults decide. The array adds a same-array phase estimate and names where it disagrees with those controls.",
+    "detail": "pH, pH-meter calibration, temperature, gravity, recipe, and visible faults decide. The array adds a same-array phase estimate and names where it disagrees with those controls.",
     "metrics": [
       {
         "label": "Batch",
@@ -256,6 +368,12 @@
           "label": "Target pH",
           "type": "number",
           "placeholder": "3.8"
+        },
+        {
+          "id": "endDay",
+          "label": "Recipe end (day)",
+          "type": "number",
+          "placeholder": "14"
         }
       ],
       "logFields": [
@@ -270,6 +388,16 @@
           "label": "pH",
           "type": "number",
           "placeholder": "4.1"
+        },
+        {
+          "id": "cal",
+          "label": "pH meter calibrated",
+          "type": "select",
+          "options": [
+            "yes",
+            "no",
+            "not checked"
+          ]
         },
         {
           "id": "temp",
@@ -439,7 +567,7 @@
       "title": "How to use this workspace",
       "body": [
         "Start one batch. Fill the batch fields, then add a reading whenever you measure pH, temperature, or gravity, or inspect the vessel.",
-        "The verdict uses the structured visible-fault choice, pH, temperature, ferment type, and target. Free-text smell and visual notes are context; they are not keyword triggers.",
+        "The verdict uses the structured visible-fault choice, pH, pH-meter calibration status, temperature, ferment type, target, and recipe end day. Free-text smell and visual notes are context; they are not keyword triggers.",
         "The array panel reads the host's baseline-relative response and states where its phase estimate disagrees with the log. The Vial profile is the change detector: the host requires at least two corroborating channels and applies the profile's persistence, hysteresis, confidence floor, and coverage gate.",
         "The stop rules are deliberately conservative. A sensor reading cannot clear a batch; it can only add a prompt to look, measure, or discard."
       ]

@@ -151,6 +151,7 @@
           </select>
         </label>
         <label>Target pH <input id="fTarget" data-field="target" type="number" step="0.01" placeholder="3.8" /></label>
+        <label>Recipe end (day) <input id="fEndDay" data-field="endDay" type="number" step="1" min="1" placeholder="14" /></label>
         <label>Batch status
           <select id="fStatus" data-field="status">
             <option value="active">in progress</option>
@@ -174,7 +175,7 @@
     <span class="phase-pill" id="arrayPill">ARRAY —</span>
     <span class="phase-pill" id="profilePill">PROFILE —</span>
     <span class="phase-copy" id="phaseCopy">Add a reading to start the batch clock.</span>
-    <span class="phase-score" id="protocolScore">0/7 primary controls</span>
+    <span class="phase-score" id="protocolScore">0/8 primary controls</span>
   </div>
 
   <div class="grid">
@@ -269,6 +270,14 @@
         <form id="logForm" class="log-form">
           <label>Day <input name="day" type="number" step="1" min="0" placeholder="3" /></label>
           <label>pH <input name="ph" type="number" step="0.01" min="0" max="14" placeholder="4.1" /></label>
+          <label>pH meter calibrated
+            <select name="cal">
+              <option value="">not recorded</option>
+              <option value="yes">yes</option>
+              <option value="no">no</option>
+              <option value="not checked">not checked</option>
+            </select>
+          </label>
           <label>Temp °C <input name="temp" type="number" step="0.1" placeholder="21" /></label>
           <label>SG <input name="sg" type="number" step="0.001" placeholder="1.040" /></label>
           <label>Visible fault
@@ -387,6 +396,43 @@
     }
     return null;
   }
+  function latestText(logs, key) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      var v = String((logs[i].values || {})[key] || "").trim();
+      if (v) return v.toLowerCase();
+    }
+    return null;
+  }
+  function latestWith(logs, key) {
+    for (var i = logs.length - 1; i >= 0; i--) {
+      var v = num((logs[i].values || {})[key]);
+      if (v !== null) return { value: v, log: logs[i] };
+    }
+    return null;
+  }
+  function calibrationOf(reading) {
+    if (!reading || !reading.log) return "";
+    return String((reading.log.values || {}).cal || "").trim().toLowerCase();
+  }
+  function calibrationLabel(cal) {
+    if (cal === "yes") return "calibrated";
+    if (cal === "no") return "not calibrated";
+    if (cal === "not checked") return "not checked";
+    return "not recorded";
+  }
+  function processReading(id) {
+    var p = data && data.snapshot && data.snapshot.process ? data.snapshot.process[id] : null;
+    if (!p || !finite(p.value)) return null;
+    return p;
+  }
+  function processCalibration(p) {
+    if (!p || !p.calibration) return "";
+    var s = String(p.calibration.state || "").toLowerCase();
+    if (s === "calibrated") return "yes";
+    if (s === "uncalibrated" || s === "stale") return "no";
+    if (s === "unknown") return "not checked";
+    return "";
+  }
   function maxDay(logs) {
     var best = null;
     logs.forEach(function (l) {
@@ -439,10 +485,15 @@
     var target = num(fields.target);
     var style = String(fields.style || "").toLowerCase();
     var day = currentDay(logs);
-    var ph = latestValue(logs, "ph");
+    var probe = processReading("ph");
+    var phReading = latestWith(logs, "ph");
+    var ph = probe ? probe.value : phReading ? phReading.value : null;
+    var phCal = probe ? processCalibration(probe) : calibrationOf(phReading);
+    var phSource = probe ? "probe" : phReading ? "manual" : "none";
     var temp = latestValue(logs, "temp");
     var fault = latestFault(logs);
     var latest = latestLog(logs);
+    var sg = latestValue(logs, "sg");
     if (hasLoggedDiscard(logs)) {
       return {
         key: "discard", tone: "stop", label: "Discard recorded",
@@ -471,11 +522,20 @@
       };
     }
     if (style === "low-acid" && ph !== null && ph > 4.6 && day >= 2) {
+      if (phCal !== "yes") {
+        return {
+          key: "above-4.6-unverified", tone: "stop", label: "Above 4.6 — verify meter",
+          copy: "The logged pH is above the low-acid boundary, but the meter is not recorded as calibrated. Treat it as a stop until verified.",
+          body: "You marked this as a low-acid ferment. The logged pH is above the 4.6 boundary after day 2, but the reading is not backed by a recorded calibration.",
+          action: "Calibrate the meter with fresh pH 4.0 and 7.0 buffers and re-measure. If the calibrated reading is still above 4.6, chill or discard per the tested recipe.",
+          note: "An uncalibrated meter can be wrong in either direction. The stop is provisional, but the batch is not cleared."
+        };
+      }
       return {
         key: "above-4.6", tone: "stop", label: "Above 4.6",
         copy: "The logged pH is above the low-acid botulism-control boundary. Verify it and stop.",
-        body: "You marked this as a low-acid ferment. The logged pH is above the 4.6 boundary after day 2.",
-        action: "Stop. Chill or discard per the tested recipe. Verify with a calibrated meter; do not use smell to overrule it.",
+        body: "You marked this as a low-acid ferment. The logged pH is above the 4.6 boundary after day 2, and the meter is recorded as calibrated.",
+        action: "Stop. Chill or discard per the tested recipe. Re-check with fresh buffers; do not use smell to overrule it.",
         note: "The app is repeating your log. It is not a pH meter and not a safety certificate."
       };
     }
@@ -513,6 +573,24 @@
         body: "The log has no pH reading. The sensor cannot stand in for the primary control.",
         action: "Measure pH with a calibrated meter and add it to the log.",
         note: "A change signal is not a safety verdict."
+      };
+    }
+    if (phCal === "no") {
+      return {
+        key: "ph-uncalibrated", tone: "warn", label: "pH meter not calibrated",
+        copy: "The latest pH reading is recorded as uncalibrated. Do not use it to call the batch at target.",
+        body: "The latest pH reading is marked not calibrated. The app will not turn an uncalibrated number into an at-target verdict.",
+        action: "Calibrate with fresh pH 4.0 and 7.0 buffers, then re-measure and log the calibrated reading.",
+        note: "An uncalibrated meter can read high or low. The array cannot substitute for pH."
+      };
+    }
+    if (target !== null && ph <= target && phCal !== "yes") {
+      return {
+        key: "at-target-unverified", tone: "warn", label: "At target — calibration not confirmed",
+        copy: "The logged pH is at or below target, but the meter is not recorded as calibrated. Do not treat this as at target yet.",
+        body: "The log says the pH is at or below the recipe target, but the reading is not backed by a recorded calibration.",
+        action: "Calibrate the meter and re-measure. If the calibrated pH is still at or below target, the at-target state can be recorded.",
+        note: "The target is recipe-specific. A single uncalibrated reading is not enough to close the batch."
       };
     }
     if (temp === null) {
@@ -554,13 +632,41 @@
     if (String(fields.recipe || "").trim()) score++;
     if (String(fields.style || "").trim()) score++;
     if (num(fields.target) !== null) score++;
-    if (latest && latestValue(logs, "ph") !== null) score++;
+    var probe = processReading("ph");
+    var phReading = latestWith(logs, "ph");
+    if (probe || phReading) score++;
+    if (probe ? processCalibration(probe) : (phReading && calibrationOf(phReading))) score++;
     if (latest && latestValue(logs, "temp") !== null) score++;
     return score;
   }
 
+  function progressState(logs) {
+    var fields = (data && data.domain && data.domain.fields) || {};
+    var target = num(fields.target);
+    var endDay = num(fields.endDay);
+    var day = currentDay(logs);
+    var probe = processReading("ph");
+    var phReading = latestWith(logs, "ph");
+    var ph = probe ? probe.value : phReading ? phReading.value : null;
+    var cal = probe ? processCalibration(probe) : calibrationOf(phReading);
+    var phTrend = trend(logs, "ph");
+    var sgTrend = trend(logs, "sg");
+    var atTarget = ph !== null && target !== null && ph <= target && cal === "yes";
+    var phFalling = !!(phTrend && phTrend.rate <= -0.02);
+    var sgFalling = !!(sgTrend && sgTrend.rate <= -0.001);
+    var phFlat = !phTrend || phTrend.rate > -0.01;
+    var sgFlat = !sgTrend || sgTrend.rate > -0.001;
+    return {
+      target: target, endDay: endDay, day: day, ph: ph, cal: cal,
+      phTrend: phTrend, sgTrend: sgTrend, atTarget: atTarget,
+      falling: phFalling || sgFalling,
+      flat: phFlat && sgFlat,
+      endReached: endDay !== null && day >= endDay,
+      phRising: !!(phTrend && phTrend.rate > 0.01)
+    };
+  }
+
   function batchPhase(logs) {
-    var target = num((data && data.domain && data.domain.fields || {}).target);
     var started = dateDay(fieldValue("started"));
     if (!logs.length && started === null) {
       return { label: "Not started", tone: "", copy: "Add a reading to start the batch clock.", score: protocolScore(logs) };
@@ -579,18 +685,32 @@
       };
     }
     if (primary) return { label: primary.label, tone: primary.tone, copy: primary.copy, score: protocolScore(logs) };
-    var day = currentDay(logs);
-    var ph = latestValue(logs, "ph");
-    if (ph !== null && target !== null && ph <= target) {
-      return { label: "At target", tone: "good", copy: "The logged pH is at or below your target. Hold the recipe; this is not a safety certificate.", score: protocolScore(logs) };
+    var p = progressState(logs);
+    if (p.atTarget) {
+      return { label: "At target", tone: "good", copy: "The logged pH is at or below your target and the meter is recorded as calibrated. Hold the recipe; this is not a safety certificate.", score: protocolScore(logs) };
     }
-    if (day <= 3) return { label: "Lag", tone: "", copy: "Early phase. Keep solids submerged and verify pH and temperature; quiet bubbles are not a safety signal.", score: protocolScore(logs) };
-    if (day >= 10) return { label: "Finish window", tone: "warn", copy: "The recipe window is closing. Check pH, temperature, and visible faults before packaging.", score: protocolScore(logs) };
-    return { label: "Active", tone: "good", copy: "Acidity is still moving toward the recipe target. Keep the log going.", score: protocolScore(logs) };
+    if (p.phRising) {
+      return { label: "pH rising", tone: "warn", copy: "The logged pH is rising. That is the opposite of the expected acidification; verify the meter, the recipe, and the vessel before assuming the batch is active.", score: protocolScore(logs) };
+    }
+    if (p.endReached) {
+      return { label: "Finish window", tone: "warn", copy: "The recipe end day has arrived. Check pH, temperature, gravity, and visible faults before packaging.", score: protocolScore(logs) };
+    }
+    if (p.falling) {
+      var bits = [];
+      if (p.phTrend) bits.push("pH " + p.phTrend.rate.toFixed(2) + " / day");
+      if (p.sgTrend) bits.push("SG " + p.sgTrend.rate.toFixed(4) + " / day");
+      return { label: "Active", tone: "good", copy: "The log shows a falling " + bits.join(" and ") + ". Keep the recipe and keep logging.", score: protocolScore(logs) };
+    }
+    if (p.day <= 3) {
+      return { label: "Lag", tone: "", copy: "Early phase. There are not enough readings to establish a trend. Keep solids submerged and verify pH and temperature; quiet bubbles are not a safety signal.", score: protocolScore(logs) };
+    }
+    if (p.flat) {
+      return { label: "No progress", tone: "warn", copy: "The logged pH and gravity are flat or rising after the early phase. That is not an active trend; verify the temperature, the seal, the recipe, and the meter.", score: protocolScore(logs) };
+    }
+    return { label: "Active", tone: "good", copy: "The log is still moving toward the recipe target. Keep the log going.", score: protocolScore(logs) };
   }
 
   function verdictInfo(logs) {
-    var target = num((data && data.domain && data.domain.fields || {}).target);
     var started = dateDay(fieldValue("started"));
     if (!logs.length && started === null) {
       return {
@@ -613,15 +733,29 @@
       };
     }
     if (primary) return { tone: primary.tone, label: primary.label, body: primary.body, action: primary.action, note: primary.note };
-    var day = currentDay(logs);
-    var ph = latestValue(logs, "ph");
-    if (ph !== null && target !== null && ph <= target) {
-      return { tone: "good", label: "At target", body: "The logged pH is at or below your target and no structured visible fault is recorded. Keep the batch record.", action: "Hold the recipe, keep solids submerged, and continue logging until the recipe end.", note: "This is a protocol state, not a safety certificate." };
+    var p = progressState(logs);
+    if (p.atTarget) {
+      return { tone: "good", label: "At target", body: "The logged pH is at or below your target, the meter is recorded as calibrated, and no structured visible fault is recorded. Keep the batch record.", action: "Hold the recipe, keep solids submerged, and continue logging until the recipe end.", note: "This is a protocol state, not a safety certificate." };
     }
-    if (day >= 10) {
-      return { tone: "warn", label: "Finish window", body: "The recipe window is closing. The log is above target or has no target result yet.", action: "Check pH, temperature, and visible faults before packaging. Follow the tested recipe.", note: "A pleasant smell cannot clear a batch." };
+    if (p.phRising) {
+      return { tone: "warn", label: "pH rising", body: "The logged pH trend is rising, not falling. That can mean the meter is drifting, the recipe is wrong, or the batch is not acidifying.", action: "Calibrate the meter, re-measure, and verify the recipe and vessel before treating the batch as active.", note: "A rising pH is not a normal active-fermentation trend." };
     }
-    return { tone: "info", label: "Active", body: "The logged pH is above your target. The sensor cannot stand in for pH; follow the tested recipe's boundary.", action: "Keep the temperature stable, keep solids submerged, and measure pH again on schedule.", note: "Not a safety certificate. The primary controls decide." };
+    if (p.endReached) {
+      return { tone: "warn", label: "Finish window", body: "The recipe end day has arrived and the log has not recorded an at-target, calibrated pH.", action: "Check pH, temperature, gravity, and visible faults before packaging. Follow the tested recipe.", note: "A pleasant smell cannot clear a batch." };
+    }
+    if (p.falling) {
+      var bits = [];
+      if (p.phTrend) bits.push("pH " + p.phTrend.rate.toFixed(2) + " / day");
+      if (p.sgTrend) bits.push("SG " + p.sgTrend.rate.toFixed(4) + " / day");
+      return { tone: "info", label: "Active", body: "The log shows a falling " + bits.join(" and ") + ". The sensor cannot stand in for pH; follow the tested recipe's boundary.", action: "Keep the temperature stable, keep solids submerged, and measure pH again on schedule.", note: "Not a safety certificate. The primary controls decide." };
+    }
+    if (p.day <= 3) {
+      return { tone: "info", label: "Lag", body: "There are not enough readings to establish a pH or gravity trend. Early quiet is not a safety signal either way.", action: "Keep solids submerged, hold the recipe temperature, and take another reading.", note: "A quiet array or a quiet airlock is not a safety certificate." };
+    }
+    if (p.flat) {
+      return { tone: "warn", label: "No progress", body: "The logged pH and gravity are flat or rising after the early phase. The log does not show an active trend.", action: "Verify the temperature, the seal, the recipe, and the pH meter. Re-measure before changing the batch.", note: "A flat log is a prompt to check, not a diagnosis." };
+    }
+    return { tone: "info", label: "Active", body: "The log is still moving toward the recipe target. The sensor cannot stand in for pH; follow the tested recipe's boundary.", action: "Keep the temperature stable, keep solids submerged, and measure pH again on schedule.", note: "Not a safety certificate. The primary controls decide." };
   }
 
   // ---- The array model: the same-array change signal, judged against noise. ----
@@ -854,7 +988,7 @@
   }
 
   function renderFields() {
-    ["batch", "started", "recipe", "style", "target", "status"].forEach(function (key) {
+    ["batch", "started", "recipe", "style", "target", "endDay", "status"].forEach(function (key) {
       var input = document.querySelector('[data-field="' + key + '"]');
       if (input && document.activeElement !== input) input.value = fieldValue(key) || (key === "status" ? "active" : "");
     });
@@ -873,7 +1007,7 @@
     pill.className = "phase-pill " + p.tone;
     pill.textContent = p.label;
     setText("phaseCopy", p.copy);
-    setText("protocolScore", p.score + "/7 primary controls");
+    setText("protocolScore", p.score + "/8 primary controls");
     var arrayPill = $("#arrayPill");
     if (model.ready && model.phase && model.batchStarted) {
       arrayPill.className = "phase-pill " + model.phase.tone;
@@ -957,7 +1091,12 @@
     var target = num(fields.target);
     var day = currentDay(logs);
     var started = dateDay(fieldValue("started"));
-    var ph = latestValue(logs, "ph");
+    var probe = processReading("ph");
+    var phReading = latestWith(logs, "ph");
+    var ph = probe ? probe.value : phReading ? phReading.value : null;
+    var phCal = probe ? processCalibration(probe) : calibrationOf(phReading);
+    var phSource = probe ? "probe" : phReading ? "manual" : "none";
+    var endDay = num(fields.endDay);
     var temp = latestValue(logs, "temp");
     var sg = latestValue(logs, "sg");
     var sgTrend = trend(logs, "sg");
@@ -965,13 +1104,19 @@
     facts.push({
       k: "Batch day",
       v: logs.length || started !== null ? String(day) : "—",
-      s: started !== null ? "from the start date" : logs.length ? "newest logged day" : "no readings"
+      s: started !== null ? "from the start date" + (endDay !== null ? ", recipe end day " + endDay : "") : logs.length ? "newest logged day" : "no readings"
     });
     facts.push({
       k: "pH",
       v: ph === null ? "—" : fmt(ph, 2),
-      s: target === null ? "no target set" : ph === null ? "target " + fmt(target, 2) : ph <= target ? "at or below target " + fmt(target, 2) : "above target " + fmt(target, 2),
-      tone: ph === null || target === null ? "" : ph <= target ? "good" : "warn"
+      s: target === null ? "no target set" : ph === null ? "target " + fmt(target, 2) : ph <= target ? "at or below target " + fmt(target, 2) + " (" + phSource + ", " + calibrationLabel(phCal) + ")" : "above target " + fmt(target, 2) + " (" + phSource + ")",
+      tone: ph === null || target === null ? "" : ph <= target && phCal === "yes" ? "good" : ph > target ? "warn" : ""
+    });
+    facts.push({
+      k: "pH calibration",
+      v: ph === null ? "—" : calibrationLabel(phCal),
+      s: ph === null ? "no pH reading" : phCal === "yes" ? "at-target calls are allowed" : "at-target calls are withheld",
+      tone: ph === null ? "" : phCal === "yes" ? "good" : phCal === "no" ? "warn" : ""
     });
     facts.push({
       k: "Temperature",

@@ -25,6 +25,22 @@ const workspace = readFileSync(join(root, manifest.ui.entry), 'utf8');
 assert.match(workspace, /snapshot\.detection|\.detection\b/, 'the workspace must read the host profile verdict');
 assert.match(workspace, /triggeredChannels/, 'the workspace must show which channels the profile triggered');
 assert.match(workspace, /profileActive/, 'the workspace must use the profile verdict as the change call');
+assert.match(workspace, /calibrationOf/, 'the workspace must read the pH-meter calibration status');
+assert.match(workspace, /progressState/, 'the batch phase must be trend-driven');
+assert.match(workspace, /endDay/, 'the recipe end day must be an input, not a hard-coded day');
+assert.match(workspace, /No progress/, 'a flat pH/gravity trend must be reported as no progress');
+const tracking = manifest.widgets.find((w) => w.type === 'tracking');
+assert.ok(tracking, 'the manifest must declare a tracking widget');
+assert.ok(tracking.fields.some((f) => f.id === 'endDay'), 'the batch fields must include the recipe end day');
+assert.ok(tracking.logFields.some((f) => f.id === 'cal'), 'the log fields must include pH-meter calibration');
+assert.ok(manifest.claims.some((c) => c.id === 'trend-calibration'), 'the calibration gate must be a declared claim');
+assert.ok(manifest.processSensors.some((s) => s.id === 'ph'), 'pH must be declared as a process sensor, not a gas channel');
+assert.equal(manifest.processSensors.find((s) => s.id === 'ph').fallback, 'manual', 'pH must have a manual fallback');
+assert.match(workspace, /processReading/, 'the workspace must consume the host process reading when present');
+assert.match(workspace, /processCalibration/, 'the workspace must consume the probe calibration state');
+const home = readFileSync(join(root, 'home.html'), 'utf8');
+assert.match(home, /calibration not confirmed/, 'the Home view must gate at-target on calibration');
+assert.match(home, /name="cal"/, 'the Home quick log must record pH-meter calibration');
 
 // Missing evidence is a warning, not a test failure: the host installs this as
 // Ungated. The test must not imply a held-out report exists when it does not.
